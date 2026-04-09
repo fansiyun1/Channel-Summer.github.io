@@ -1,0 +1,5645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Channel Summer | 夏日通道</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Dancing+Script:wght@400;600&family=Courier+Prime:wght@400;700&display=swap');
+
+    :root {
+      --paper: #fafafa;
+      --paper-aged: #f5f5f5;
+      --paper-stain: #e8e8e8;
+      --sun-glow: rgba(255, 220, 150, 0.6);
+      --sun-core: rgba(255, 240, 200, 0.9);
+      --halo-soft: rgba(255, 245, 230, 0.4);
+      --halo-bright: rgba(255, 250, 240, 0.8);
+      --ink: #2c2c2c;
+      --ink-faded: #6b6b6b;
+      --ink-ghost: #999999;
+      --seal: #b85c5c;
+      --seal-faded: #d4a5a5;
+      --shadow-soft: rgba(0,0,0,0.04);
+      --shadow-medium: rgba(0,0,0,0.08);
+      --chemtrails-blue: #7a9eb8;
+      --chemtrails-pink: #e8ddd4;
+      --chemtrails-cream: #f5f1e8;
+      --chemtrails-gold: #c9b896;
+      --chemtrails-green: #8fa68e;
+      --pool-cyan: #7a9eb8;
+      --pool-blue: #5a7a98;
+      --font-serif: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+      --font-display: 'Cormorant Garamond', 'Noto Serif SC', serif;
+      --font-sans: 'Montserrat', sans-serif;
+      --font-mono: 'Courier Prime', 'Courier New', monospace;
+      --font-playfair: 'Playfair Display', serif;
+      --font-handwriting: 'Dancing Script', cursive;
+      --transition-slow: 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-medium: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-fast: 0.3s ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: var(--font-serif);
+      background: #ffffff;
+      color: var(--ink);
+      line-height: 1.9;
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* 夏日纯白空气背景系统 */
+    #summer-memory {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -100;
+      pointer-events: none;
+      overflow: hidden;
+      background: linear-gradient(180deg, #ffffff 0%, #f8f8f8 50%, #f5f5f5 100%);
+    }
+
+    /* 夏日阳光光晕层 */
+    #sun-glow {
+      position: fixed;
+      top: -20%;
+      right: -10%;
+      width: 80vh;
+      height: 80vh;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, 
+        rgba(255, 248, 220, 0.9) 0%,
+        rgba(255, 240, 200, 0.6) 20%,
+        rgba(255, 230, 180, 0.3) 40%,
+        transparent 70%);
+      filter: blur(40px);
+      animation: sunPulse 8s ease-in-out infinite, sunDrift 20s ease-in-out infinite;
+      z-index: -99;
+      pointer-events: none;
+    }
+
+    @keyframes sunPulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+
+    @keyframes sunDrift {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(3%, 2%); }
+      50% { transform: translate(-2%, 4%); }
+      75% { transform: translate(1%, -2%); }
+    }
+
+    #sun-halo-secondary {
+      position: fixed;
+      top: 10%;
+      left: -15%;
+      width: 60vh;
+      height: 60vh;
+      border-radius: 50%;
+      background: radial-gradient(circle at center,
+        rgba(255, 250, 240, 0.5) 0%,
+        rgba(255, 245, 230, 0.3) 30%,
+        transparent 60%);
+      filter: blur(60px);
+      animation: haloFloat 15s ease-in-out infinite reverse;
+      z-index: -98;
+      pointer-events: none;
+    }
+
+    @keyframes haloFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(5%, -3%) scale(1.1); }
+      66% { transform: translate(-3%, 5%) scale(0.95); }
+    }
+
+    #sun-rays {
+      position: fixed;
+      top: -50%;
+      right: -20%;
+      width: 150vh;
+      height: 150vh;
+      background: conic-gradient(from 0deg at 50% 50%,
+        transparent 0deg,
+        rgba(255, 250, 220, 0.03) 10deg,
+        transparent 20deg,
+        rgba(255, 248, 210, 0.05) 30deg,
+        transparent 40deg,
+        rgba(255, 250, 220, 0.04) 50deg,
+        transparent 60deg,
+        rgba(255, 248, 210, 0.03) 70deg,
+        transparent 80deg,
+        rgba(255, 250, 220, 0.05) 90deg,
+        transparent 100deg,
+        rgba(255, 248, 210, 0.04) 110deg,
+        transparent 120deg,
+        rgba(255, 250, 220, 0.03) 130deg,
+        transparent 140deg,
+        rgba(255, 248, 210, 0.05) 150deg,
+        transparent 160deg,
+        rgba(255, 250, 220, 0.04) 170deg,
+        transparent 180deg,
+        rgba(255, 248, 210, 0.03) 190deg,
+        transparent 200deg,
+        rgba(255, 250, 220, 0.05) 210deg,
+        transparent 220deg,
+        rgba(255, 248, 210, 0.04) 230deg,
+        transparent 240deg,
+        rgba(255, 250, 220, 0.03) 250deg,
+        transparent 260deg,
+        rgba(255, 248, 210, 0.05) 270deg,
+        transparent 280deg,
+        rgba(255, 250, 220, 0.04) 290deg,
+        transparent 300deg,
+        rgba(255, 248, 210, 0.03) 310deg,
+        transparent 320deg,
+        rgba(255, 250, 220, 0.05) 330deg,
+        transparent 340deg,
+        rgba(255, 248, 210, 0.04) 350deg,
+        transparent 360deg
+      );
+      animation: rayRotate 60s linear infinite;
+      z-index: -97;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    @keyframes rayRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    #light-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -96;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .light-particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: radial-gradient(circle, rgba(255, 250, 220, 0.9) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: particleFloat 20s ease-in-out infinite;
+      filter: blur(1px);
+    }
+
+    @keyframes particleFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+      25% { transform: translate(100px, -50px) scale(1.5); opacity: 0.8; }
+      50% { transform: translate(-50px, -100px) scale(1); opacity: 0.5; }
+      75% { transform: translate(50px, 50px) scale(1.3); opacity: 0.7; }
+    }
+
+    #memory-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.6;
+      mix-blend-mode: multiply;
+    }
+
+    #paper-texture {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.08;
+      mix-blend-mode: overlay;
+      background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,250,240,0.02) 2px, rgba(255,250,240,0.02) 4px),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    #vignette {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9998;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(255, 248, 220, 0.3) 100%);
+    }
+
+    /* 顶部状态栏 */
+    #top-matter {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 50px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--ink-ghost);
+      border-bottom: 1px solid transparent;
+      transition: var(--transition-medium);
+      z-index: 100;
+    }
+
+    #top-matter.visible {
+      border-bottom-color: var(--paper-stain);
+      background: rgba(245, 241, 232, 0.95);
+      backdrop-filter: blur(20px);
+    }
+
+    .top-left, .top-right { display: flex; gap: 30px; align-items: center; }
+    .top-item { opacity: 0.6; transition: var(--transition-fast); cursor: default; }
+    .top-item:hover { opacity: 1; color: var(--seal); }
+
+    .project-mark {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      letter-spacing: 3px;
+      font-weight: 400;
+    }
+
+    /* 主舞台 */
+    #main-stage { min-height: 100vh; position: relative; }
+
+    /* 阈值层：火漆封印 */
+    #threshold-seal {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 40px;
+      position: relative;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity var(--transition-slow), transform var(--transition-slow);
+    }
+
+    #threshold-seal.dissolved {
+      opacity: 0;
+      transform: translateY(-30px);
+      pointer-events: none;
+    }
+
+    .wax-seal {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--seal);
+      position: relative;
+      margin-bottom: 60px;
+      box-shadow: 0 4px 20px rgba(184, 92, 92, 0.3), inset 0 -10px 20px rgba(0,0,0,0.1);
+      transform: rotate(-5deg);
+      transition: var(--transition-medium);
+    }
+
+    .wax-seal::before {
+      content: 'CS';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--paper);
+      font-size: 28px;
+      font-weight: 400;
+      font-family: var(--font-sans);
+      letter-spacing: 2px;
+    }
+
+    .wax-seal.cracked {
+      animation: crack 0.8s ease forwards;
+    }
+
+    @keyframes crack {
+      0% { transform: rotate(-5deg) scale(1); }
+      50% { transform: rotate(-5deg) scale(1.1); }
+      100% { 
+        transform: rotate(-5deg) scale(1);
+        box-shadow: 0 2px 10px rgba(184, 92, 92, 0.2), inset 0 -5px 10px rgba(0,0,0,0.1);
+        opacity: 0.6;
+      }
+    }
+
+    .seal-question {
+      font-family: var(--font-display);
+      font-size: clamp(22px, 3.5vw, 32px);
+      font-weight: 300;
+      text-align: center;
+      line-height: 2;
+      color: var(--ink);
+      margin-bottom: 70px;
+      max-width: 700px;
+      letter-spacing: 1px;
+    }
+
+    .seal-question em { font-style: italic; color: var(--seal); }
+
+    .project-title {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--ink-ghost);
+      margin-bottom: 40px;
+    }
+
+    .ink-well {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 50px;
+    }
+
+    #ink-input {
+      width: 100%;
+      padding: 25px 30px;
+      font-family: var(--font-serif);
+      font-size: 18px;
+      color: var(--ink);
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-bottom: 2px solid var(--ink-ghost);
+      text-align: center;
+      transition: var(--transition-medium);
+      position: relative;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.02);
+    }
+
+    #ink-input:focus {
+      outline: none;
+      border-bottom-color: var(--seal);
+      background: rgba(255,255,255,0.98);
+      box-shadow: 0 8px 40px rgba(184, 92, 92, 0.06);
+    }
+
+    #ink-input::placeholder {
+      color: var(--ink-ghost);
+      font-style: italic;
+      opacity: 0.6;
+    }
+
+    .ink-line {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: var(--seal);
+      transition: var(--transition-medium);
+      transform: translateX(-50%);
+    }
+
+    #ink-input:focus ~ .ink-line { width: 100%; }
+
+    #break-seal {
+      padding: 18px 50px;
+      font-family: var(--font-serif);
+      font-size: 14px;
+      letter-spacing: 4px;
+      color: var(--paper);
+      background: var(--ink);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition-medium);
+      box-shadow: 0 4px 20px var(--shadow-medium);
+      z-index: 10;
+    }
+
+    #break-seal::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--seal);
+      transition: var(--transition-medium);
+      z-index: 0;
+    }
+
+    #break-seal:hover::before { left: 0; }
+    #break-seal span { position: relative; z-index: 1; }
+    #break-seal:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--shadow-medium); }
+    #break-seal:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .marginalia {
+      margin-top: 60px;
+      font-size: 12px;
+      color: var(--ink-ghost);
+      font-style: italic;
+      text-align: center;
+      max-width: 500px;
+      line-height: 2;
+    }
+
+    .faded-word {
+      display: inline-block;
+      margin: 0 8px;
+      padding: 4px 12px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 2px;
+      transition: var(--transition-fast);
+      cursor: default;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .faded-word:hover { color: var(--seal); background: rgba(184, 92, 92, 0.08); }
+
+    /* 星系层：星图 */
+    #star-atlas {
+      display: none;
+      min-height: 100vh;
+      padding: 120px 60px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--transition-slow), transform var(--transition-slow);
+    }
+
+    #star-atlas.revealed { display: block; opacity: 1; transform: translateY(0); }
+
+    .atlas-header { text-align: center; margin-bottom: 80px; }
+
+    .atlas-title {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      color: var(--ink-ghost);
+      margin-bottom: 20px;
+    }
+
+    .atlas-subtitle { font-size: 13px; color: var(--ink-faded); font-style: italic; }
+
+    #constellation {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 40px;
+      max-width: 900px;
+      margin: 0 auto;
+      aspect-ratio: 1 / 1;
+      max-height: 80vh;
+    }
+
+    .star-entry {
+      position: relative;
+      padding: 50px 40px;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid var(--paper-stain);
+      cursor: pointer;
+      transition: var(--transition-medium);
+      overflow: hidden;
+      backdrop-filter: blur(15px);
+      z-index: 10;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .star-entry[data-channel="contrail"]::before {
+      background: linear-gradient(135deg, var(--chemtrails-pink) 0%, var(--chemtrails-blue) 100%);
+    }
+
+    .star-entry[data-channel="lemontree"]::before {
+      background: linear-gradient(135deg, #FFFACD 0%, #9ACD32 100%);
+    }
+
+    .star-entry[data-channel="highway"]::before {
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    }
+
+    .star-entry[data-channel="pool"]::before {
+      background: linear-gradient(135deg, var(--pool-cyan) 0%, var(--pool-blue) 100%);
+    }
+
+    .star-entry::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      transition: height var(--transition-medium);
+      opacity: 0.15;
+    }
+
+    .star-entry:hover::before { height: 100%; }
+    .star-entry:hover { 
+      transform: scale(1.02); 
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08); 
+      background: rgba(255,255,255,0.95);
+      border-color: var(--seal-faded);
+    }
+
+    .entry-number {
+      position: absolute;
+      top: 25px;
+      right: 30px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--ink-ghost);
+      letter-spacing: 3px;
+      opacity: 0.6;
+    }
+
+    .entry-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 300;
+      margin-bottom: 20px;
+      color: var(--ink);
+      transition: var(--transition-fast);
+      pointer-events: none;
+      letter-spacing: 2px;
+    }
+
+    .star-entry:hover .entry-title { color: var(--seal); }
+
+    .entry-type {
+      font-size: 10px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--ink-ghost);
+      margin-bottom: 30px;
+      pointer-events: none;
+      font-family: var(--font-sans);
+    }
+
+    .entry-trace {
+      font-size: 14px;
+      color: var(--ink-faded);
+      font-style: italic;
+      line-height: 1.8;
+      opacity: 0.7;
+      transition: var(--transition-fast);
+      pointer-events: none;
+      max-width: 100%;
+      word-wrap: break-word;
+      white-space: normal;
+    }
+
+    .entry-trace::before {
+      content: "\201C";
+      color: var(--ink-faded);
+      opacity: 0.8;
+    }
+
+    .entry-trace::after {
+      content: "\201D";
+      color: var(--ink-faded);
+      opacity: 0.8;
+    }
+
+    .star-entry:hover .entry-trace { opacity: 1; color: var(--ink); }
+
+    /* 通道层 */
+    #open-page {
+      display: none;
+      min-height: 100vh;
+      opacity: 0;
+      transition: opacity var(--transition-slow);
+    }
+
+    #open-page.visible { display: block; opacity: 1; }
+
+    .page-header {
+      position: sticky;
+      top: 50px;
+      padding: 30px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid var(--paper-stain);
+      background: rgba(245, 241, 232, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 50;
+    }
+
+    .page-location { font-family: var(--font-display); font-size: 20px; font-weight: 300; }
+
+    .page-coordinates {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--ink-ghost);
+      letter-spacing: 2px;
+      margin-top: 5px;
+    }
+
+    #close-page {
+      font-family: var(--font-serif);
+      font-size: 12px;
+      color: var(--ink-ghost);
+      background: none;
+      border: 1px solid var(--paper-stain);
+      padding: 10px 25px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      letter-spacing: 2px;
+    }
+
+    #close-page:hover { color: var(--seal); border-color: var(--seal); background: rgba(184, 92, 92, 0.05); }
+
+    .page-content { max-width: 100%; margin: 0; padding: 0; }
+
+    /* Chemtrails 板块 - 丰富拼贴风格 */
+    .chemtrails-content {
+      position: relative;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #ffffff 0%, #fafafa 50%, #f5f5f5 100%);
+    }
+
+    .chemtrails-hero-collage {
+      position: relative;
+      min-height: 100vh;
+      padding: 80px 60px;
+      overflow: hidden;
+    }
+
+    .chemtrails-p5-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .collage-photo {
+      position: absolute;
+      z-index: 10;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      transition: all 0.5s ease;
+      cursor: pointer;
+      overflow: hidden;
+      background: transparent;
+      padding: 0;
+      border: none;
+    }
+
+    .collage-photo:hover {
+      transform: scale(1.05) rotate(0deg) !important;
+      z-index: 100;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+    .collage-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: sepia(20%) saturate(85%) contrast(95%);
+      transition: filter 0.3s ease;
+    }
+
+    .collage-photo:hover img {
+      filter: sepia(0%) saturate(100%) contrast(100%);
+    }
+
+    .photo-1 { width: 280px; height: 200px; top: 15%; left: 5%; transform: rotate(-5deg); }
+    .photo-2 { width: 240px; height: 320px; top: 10%; right: 8%; transform: rotate(3deg); }
+    .photo-3 { width: 200px; height: 150px; top: 50%; left: 3%; transform: rotate(2deg); }
+    .photo-4 { width: 260px; height: 180px; bottom: 20%; left: 15%; transform: rotate(-3deg); }
+    .photo-5 { width: 220px; height: 280px; bottom: 15%; right: 10%; transform: rotate(4deg); }
+    .photo-6 { width: 200px; height: 150px; top: 45%; right: 5%; transform: rotate(-2deg); }
+    .photo-7 { width: 220px; height: 160px; bottom: 35%; right: 25%; transform: rotate(3deg); }
+
+    .typewriter-layer {
+      position: absolute;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .typewriter-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.8;
+      color: #4a5568;
+      background: rgba(255,255,255,0.9);
+      padding: 25px 30px;
+      max-width: 320px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .typewriter-text.left { top: 25%; left: 35%; transform: rotate(-1deg); }
+    .typewriter-text.right { top: 55%; right: 30%; transform: rotate(1deg); }
+    .typewriter-text.center { bottom: 25%; left: 50%; transform: translateX(-50%) rotate(-0.5deg); }
+
+    .typewriter-header {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #718096;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 8px;
+    }
+
+    .typewriter-line {
+      margin: 8px 0;
+      opacity: 0;
+      animation: typeIn 0.8s ease forwards;
+    }
+
+    .typewriter-line:nth-child(2) { animation-delay: 0.3s; }
+    .typewriter-line:nth-child(3) { animation-delay: 0.6s; }
+    .typewriter-line:nth-child(4) { animation-delay: 0.9s; }
+    .typewriter-line:nth-child(5) { animation-delay: 1.2s; }
+
+    @keyframes typeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .handwritten-lyric {
+      position: absolute;
+      font-family: var(--font-handwriting);
+      font-size: 32px;
+      color: #5a6b7c;
+      opacity: 0.9;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.6);
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .handwritten-lyric.top { top: 8%; left: 50%; transform: translateX(-50%) rotate(-2deg); }
+    .handwritten-lyric.bottom { bottom: 8%; left: 20%; transform: rotate(2deg); }
+
+    .collage-stamp {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border: 2px solid rgba(184, 92, 92, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: rgba(184, 92, 92, 0.6);
+      transform: rotate(15deg);
+      z-index: 25;
+      pointer-events: none;
+    }
+
+    .collage-stamp.top-right { top: 5%; right: 25%; }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      text-align: center;
+      animation: bounce 2s infinite;
+    }
+
+    .scroll-hint-text {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: #718096;
+      margin-bottom: 8px;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+      40% { transform: translateX(-50%) translateY(-10px); }
+      60% { transform: translateX(-50%) translateY(-5px); }
+    }
+
+    .chemtrails-prose-section {
+      position: relative;
+      z-index: 40;
+      background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 10%, rgba(250,250,250,0.98) 100%);
+      padding: 100px 0 60px;
+      margin-top: -100px;
+      width: 100vw;
+      margin-left: calc(-50vw + 50%);
+    }
+
+    .chemtrails-prose {
+      max-width: 680px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.95);
+      padding: 60px;
+      border: 1px solid var(--paper-stain);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+    }
+
+    .prose-fullwidth-wrapper {
+      width: 100vw;
+      margin-left: calc(-50vw + 50%);
+      padding: 80px 0;
+    }
+
+    .chemtrails-prose p {
+      font-size: 16px;
+      line-height: 2.4;
+      margin-bottom: 2em;
+      text-align: justify;
+      text-indent: 2em;
+      color: var(--ink-faded);
+    }
+
+    .chemtrails-prose p:first-letter {
+      font-family: var(--font-playfair);
+      font-size: 3.5em;
+      float: left;
+      line-height: 0.9;
+      margin-right: 0.1em;
+      margin-top: -0.05em;
+      color: var(--chemtrails-blue);
+    }
+
+    .chemtrails-quote-block {
+      margin: 60px 0;
+      padding: 40px 50px;
+      border-left: 2px solid var(--chemtrails-gold);
+      background: linear-gradient(90deg, rgba(201,184,150,0.08) 0%, transparent 100%);
+      font-family: var(--font-playfair);
+      font-style: italic;
+      font-size: 22px;
+      color: #5a6b7c;
+      line-height: 1.7;
+      position: relative;
+    }
+
+    .chemtrails-quote-block::before {
+      content: '"';
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 60px;
+      color: var(--chemtrails-gold);
+      opacity: 0.3;
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+
+    /* 全屏P5视觉区域 */
+    .p5-fullscreen-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+    }
+    
+    #p5-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    
+    #p5-container canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+    
+    .p5-overlay {
+      position: absolute;
+      bottom: 60px;
+      left: 60px;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+    
+    .p5-content-wrapper {
+      margin: 0 auto;
+      padding: 80px 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .p5-overlay {
+        bottom: 30px;
+        left: 20px;
+      }
+      
+      .p5-content-wrapper {
+        padding: 40px 20px;
+      }
+    }
+
+    /* 痕迹区域 */
+    .reader-margin {
+      max-width: 680px;
+      margin: 100px auto;
+      padding: 60px 50px;
+      background: linear-gradient(180deg, 
+        rgba(250, 248, 245, 0.98) 0%, 
+        rgba(245, 242, 238, 0.95) 50%,
+        rgba(240, 236, 230, 0.92) 100%);
+      border: 1px solid rgba(200, 190, 180, 0.4);
+      border-radius: 2px;
+      position: relative;
+      box-shadow: 
+        0 4px 20px rgba(0,0,0,0.03),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    .reader-margin::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 28px,
+          rgba(180, 170, 160, 0.05) 28px,
+          rgba(180, 170, 160, 0.05) 29px
+        );
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .reader-margin::after {
+      content: '';
+      position: absolute;
+      left: 30px;
+      top: 60px;
+      bottom: 60px;
+      width: 2px;
+      background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(184, 92, 92, 0.2) 10%,
+        rgba(184, 92, 92, 0.15) 90%,
+        transparent 100%);
+    }
+
+    .margin-prompt {
+      font-family: var(--font-handwriting);
+      font-size: 26px;
+      color: #7a6b5a;
+      margin-bottom: 40px;
+      padding-left: 40px;
+      line-height: 1.6;
+      position: relative;
+      opacity: 0.9;
+      letter-spacing: 0.5px;
+    }
+
+    .margin-prompt::before {
+      content: '✦';
+      position: absolute;
+      left: 0;
+      color: var(--seal);
+      opacity: 0.5;
+      font-size: 20px;
+    }
+
+    .margin-form {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 50px;
+      padding-left: 40px;
+      position: relative;
+    }
+
+    #margin-input {
+      flex: 1;
+      padding: 18px 22px;
+      font-family: var(--font-serif);
+      font-size: 16px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(180, 170, 160, 0.4);
+      border-bottom: 2px solid rgba(180, 170, 160, 0.6);
+      transition: all 0.4s ease;
+      position: relative;
+      backdrop-filter: blur(5px);
+    }
+
+    #margin-input:focus {
+      outline: none;
+      border-color: rgba(184, 92, 92, 0.4);
+      border-bottom-color: var(--seal);
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 4px 15px rgba(184, 92, 92, 0.08);
+    }
+
+    #margin-input::placeholder {
+      color: #a09080;
+      font-style: italic;
+      opacity: 0.7;
+    }
+
+    #leave-trace {
+      padding: 16px 32px;
+      font-family: var(--font-serif);
+      font-size: 14px;
+      letter-spacing: 3px;
+      color: var(--paper);
+      background: var(--ink);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+    }
+
+    #leave-trace::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--seal);
+      transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 0;
+    }
+
+    #leave-trace:hover::before {
+      left: 0;
+    }
+
+    #leave-trace span {
+      position: relative;
+      z-index: 1;
+    }
+
+    #leave-trace:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(184, 92, 92, 0.25);
+    }
+
+    #leave-trace:active {
+      transform: translateY(0);
+    }
+
+    .ex-libris {
+      margin-top: 50px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(180, 170, 160, 0.3);
+      position: relative;
+    }
+
+    .ex-header {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: #9a8b7a;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+      padding-left: 40px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .ex-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, 
+        rgba(180, 170, 160, 0.4) 0%, 
+        transparent 100%);
+    }
+
+    #traces-collection {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-left: 40px;
+    }
+
+    .trace-stamp {
+      position: relative;
+      padding: 20px 25px 20px 30px;
+      background: linear-gradient(135deg, 
+        rgba(255, 253, 250, 0.95) 0%, 
+        rgba(252, 250, 247, 0.9) 100%);
+      border-left: 3px solid rgba(180, 170, 160, 0.4);
+      border-radius: 0 4px 4px 0;
+      font-family: var(--font-handwriting);
+      font-size: 18px;
+      color: #5a5045;
+      line-height: 1.6;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: default;
+      box-shadow: 
+        0 2px 8px rgba(0,0,0,0.04),
+        0 1px 3px rgba(0,0,0,0.02);
+      opacity: 0.85;
+    }
+
+    .trace-stamp.own {
+      background: linear-gradient(135deg, 
+        rgba(255, 250, 245, 0.98) 0%, 
+        rgba(255, 245, 240, 0.95) 100%);
+      border-left-color: var(--seal);
+      opacity: 1;
+      box-shadow: 
+        0 3px 12px rgba(184, 92, 92, 0.1),
+        0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .trace-stamp:hover {
+      transform: translateX(8px) scale(1.01);
+      opacity: 1;
+      box-shadow: 
+        0 6px 20px rgba(0,0,0,0.08),
+        0 2px 8px rgba(0,0,0,0.04);
+      border-left-color: var(--seal-faded);
+    }
+
+    .trace-stamp.own:hover {
+      border-left-color: var(--seal);
+      background: linear-gradient(135deg, 
+        rgba(255, 252, 250, 1) 0%, 
+        rgba(255, 248, 245, 0.98) 100%);
+    }
+
+    .trace-stamp::after {
+      content: attr(data-time);
+      position: absolute;
+      bottom: 8px;
+      right: 15px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: #b0a090;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .trace-stamp:hover::after {
+      opacity: 0.7;
+    }
+
+    .trace-stamp::before {
+      content: '"';
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      font-family: Georgia, serif;
+      font-size: 24px;
+      color: rgba(180, 170, 160, 0.3);
+      line-height: 1;
+    }
+
+    #traces-collection:empty::before {
+      content: '暂无痕迹，成为第一个留下印记的人...';
+      font-family: var(--font-serif);
+      font-size: 14px;
+      color: #a09080;
+      font-style: italic;
+      padding: 30px 0;
+      text-align: center;
+      opacity: 0.6;
+    }
+
+    @media (max-width: 768px) {
+      #top-matter { padding: 0 20px; font-size: 9px; }
+      .top-left, .top-right { gap: 15px; }
+      #threshold-seal { padding: 80px 20px; }
+      #star-atlas { padding: 100px 20px; }
+
+      #constellation { 
+        grid-template-columns: 1fr; 
+        grid-template-rows: repeat(4, auto);
+        gap: 20px;
+        aspect-ratio: auto;
+        max-height: none;
+      }
+
+      .star-entry { padding: 30px 25px; min-height: 200px; }
+      .entry-title { font-size: 22px; }
+      .page-header { padding: 20px; flex-direction: column; gap: 15px; align-items: flex-start; }
+
+      .chemtrails-hero-collage { padding: 40px 20px; min-height: auto; }
+      .collage-photo {
+        position: relative;
+        width: 100% !important;
+        height: 200px !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        margin-bottom: 20px;
+      }
+
+      .typewriter-layer { position: relative; margin: 20px 0; }
+      .typewriter-text { max-width: 100%; }
+      .typewriter-text.left,
+      .typewriter-text.right,
+      .typewriter-text.center {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        transform: none;
+      }
+
+      .handwritten-lyric { font-size: 24px; position: relative; text-align: center; margin: 20px 0; }
+      .handwritten-lyric.top,
+      .handwritten-lyric.bottom {
+        position: relative;
+        top: auto;
+        left: auto;
+        bottom: auto;
+        transform: none;
+      }
+
+      .chemtrails-prose { padding: 30px; }
+      .wax-seal { width: 70px; height: 70px; }
+      .wax-seal::before { font-size: 22px; }
+      
+      .reader-margin {
+        margin: 60px 20px;
+        padding: 40px 25px;
+      }
+      
+      .reader-margin::after {
+        left: 15px;
+        top: 40px;
+        bottom: 40px;
+      }
+      
+      .margin-prompt,
+      .margin-form,
+      .ex-header,
+      #traces-collection {
+        padding-left: 25px;
+      }
+      
+      .margin-prompt {
+        font-size: 22px;
+      }
+      
+      .margin-form {
+        flex-direction: column;
+      }
+      
+      #leave-trace {
+        width: 100%;
+        padding: 16px;
+      }
+      
+      .trace-stamp {
+        font-size: 16px;
+        padding: 16px 20px 16px 25px;
+      }
+    }
+
+    #ink-input.error {
+      border-bottom-color: #ff6b6b;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    /* 藏书票样式 */
+    #collector-stamp-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(245, 241, 232, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 10000;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      overflow-y: auto;
+    }
+
+    #collector-stamp-overlay.visible {
+      display: flex;
+      opacity: 1;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .stamp-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      background: linear-gradient(135deg, #faf8f5 0%, #f5f2ed 100%);
+      border: 1px solid rgba(180, 160, 140, 0.3);
+      padding: 60px 50px;
+      box-shadow: 
+        0 25px 80px rgba(0,0,0,0.12),
+        0 10px 30px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+      transform: translateY(30px) scale(0.95);
+      opacity: 0;
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #collector-stamp-overlay.visible .stamp-container {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .stamp-close {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(180, 160, 140, 0.4);
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      font-size: 18px;
+      color: #8a7a6a;
+    }
+
+    .stamp-close:hover {
+      background: rgba(184, 92, 92, 0.1);
+      border-color: var(--seal);
+      color: var(--seal);
+      transform: rotate(90deg);
+    }
+
+    .stamp-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid rgba(180, 160, 140, 0.2);
+    }
+
+    .stamp-title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 300;
+      color: var(--ink);
+      letter-spacing: 4px;
+      margin-bottom: 10px;
+    }
+
+    .stamp-subtitle {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--ink-ghost);
+      text-transform: uppercase;
+    }
+
+    .stamp-visitor-info {
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(180, 160, 140, 0.2);
+      padding: 25px 30px;
+      margin-bottom: 35px;
+    }
+
+    .stamp-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      font-size: 13px;
+    }
+
+    .stamp-info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .stamp-info-label {
+      font-family: var(--font-mono);
+      color: var(--ink-ghost);
+      letter-spacing: 2px;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+
+    .stamp-info-value {
+      font-family: var(--font-serif);
+      color: var(--ink);
+      font-style: italic;
+    }
+
+    .stamp-seal-response {
+      background: linear-gradient(135deg, rgba(184, 92, 92, 0.08) 0%, rgba(184, 92, 92, 0.03) 100%);
+      border-left: 3px solid var(--seal);
+      padding: 20px 25px;
+      margin-bottom: 35px;
+      position: relative;
+    }
+
+    .stamp-seal-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--seal);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .stamp-seal-text {
+      font-family: var(--font-handwriting);
+      font-size: 24px;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .stamp-traces-section {
+      margin-bottom: 35px;
+    }
+
+    .stamp-section-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--ink-ghost);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .stamp-section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(180, 160, 140, 0.4) 0%, transparent 100%);
+    }
+
+    .stamp-traces-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stamp-trace-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      padding: 15px 20px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(180, 160, 140, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .stamp-trace-item:hover {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: rgba(184, 92, 92, 0.2);
+      transform: translateX(5px);
+    }
+
+    .stamp-trace-channel {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--seal);
+      text-transform: uppercase;
+      min-width: 80px;
+      padding-top: 3px;
+    }
+
+    .stamp-trace-text {
+      font-family: var(--font-handwriting);
+      font-size: 18px;
+      color: var(--ink);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .stamp-trace-time {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--ink-ghost);
+      white-space: nowrap;
+    }
+
+    .stamp-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 35px;
+      padding: 25px;
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(180, 160, 140, 0.15);
+    }
+
+    .stamp-stat {
+      text-align: center;
+    }
+
+    .stamp-stat-number {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 300;
+      color: var(--seal);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stamp-stat-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--ink-ghost);
+      text-transform: uppercase;
+    }
+
+    .stamp-footer {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid rgba(180, 160, 140, 0.2);
+    }
+
+    .stamp-wax-seal {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--seal);
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--paper);
+      font-family: var(--font-sans);
+      font-size: 20px;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 15px rgba(184, 92, 92, 0.3);
+      position: relative;
+    }
+
+    .stamp-wax-seal::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border: 1px dashed rgba(184, 92, 92, 0.3);
+      border-radius: 50%;
+    }
+
+    .stamp-date {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--ink-ghost);
+    }
+
+    .stamp-poem {
+      font-family: var(--font-serif);
+      font-size: 13px;
+      color: var(--ink-faded);
+      font-style: italic;
+      line-height: 2;
+      text-align: center;
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .stamp-empty-traces {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--ink-ghost);
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .stamp-container {
+        padding: 40px 25px;
+      }
+
+      .stamp-title {
+        font-size: 24px;
+      }
+
+      .stamp-stats {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .stamp-trace-item {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .stamp-trace-channel {
+        min-width: auto;
+      }
+    }
+
+    /* 音乐播放器样式 */
+    #music-player {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 9997;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      padding: 15px 20px;
+      border-radius: 50px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid rgba(180, 160, 140, 0.2);
+      transition: all 0.4s ease;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    #music-player.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #music-player:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+    }
+
+    .music-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: none;
+      background: var(--seal);
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      font-size: 16px;
+    }
+
+    .music-btn:hover {
+      background: #a05050;
+      transform: scale(1.05);
+    }
+
+    .music-btn.playing {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(184, 92, 92, 0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(184, 92, 92, 0); }
+    }
+
+    .music-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-width: 150px;
+    }
+
+    .music-title {
+      font-family: var(--font-serif);
+      font-size: 12px;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .music-artist {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--ink-ghost);
+      letter-spacing: 1px;
+    }
+
+    .music-progress {
+      width: 100px;
+      height: 3px;
+      background: rgba(180, 160, 140, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .music-progress-bar {
+      height: 100%;
+      background: var(--seal);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .music-volume {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .music-volume-slider {
+      width: 60px;
+      height: 3px;
+      background: rgba(180, 160, 140, 0.2);
+      border-radius: 2px;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .music-volume-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--seal);
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      #music-player {
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 15px;
+      }
+
+      .music-info {
+        max-width: 100px;
+      }
+
+      .music-progress {
+        width: 60px;
+      }
+
+      .music-volume-slider {
+        width: 40px;
+      }
+    }
+  </style>
+<base target="_blank">
+</head>
+<body>
+
+  <!-- 夏日纯白空气背景系统 -->
+  <div id="summer-memory">
+    <canvas id="memory-canvas"></canvas>
+  </div>
+  
+  <!-- 阳光光晕层 -->
+  <div id="sun-glow"></div>
+  <div id="sun-halo-secondary"></div>
+  <div id="sun-rays"></div>
+  <div id="light-particles"></div>
+
+  <div id="paper-texture"></div>
+  <div id="vignette"></div>
+
+  <!-- 顶部状态栏 -->
+  <div id="top-matter">
+    <div class="top-left">
+      <span class="top-item project-mark">CHANNEL SUMMER</span>
+    </div>
+    <div class="top-right">
+      <span class="top-item" id="time-elapsed">00:00:00</span>
+      <span class="top-item" style="cursor: pointer;" onclick="showCollectorStamp()">[ 藏书票 ]</span>
+    </div>
+  </div>
+
+  <!-- 主舞台 -->
+  <div id="main-stage">
+
+    <!-- 阈值层：火漆封印 -->
+    <div id="threshold-seal">
+      <div class="wax-seal" id="wax-seal"></div>
+
+      <div class="project-title">Channel Summer</div>
+
+      <div class="seal-question" id="seal-question">
+        在你拆开这封信之前，<br>
+        请<em>留下一个正在消逝的词</em>：
+      </div>
+
+      <div class="ink-well">
+        <input type="text" id="ink-input" placeholder="如：未寄出的、褪色的、第17次..." maxlength="20" autocomplete="off">
+        <div class="ink-line"></div>
+      </div>
+
+      <button type="button" id="break-seal" onclick="dissolveSeal()">
+        <span>拆 封</span>
+      </button>
+
+      <div class="marginalia" id="marginalia"></div>
+    </div>
+
+    <!-- 星系层：星图 -->
+    <div id="star-atlas">
+      <div class="atlas-header">
+        <div class="atlas-title">Channel Summer</div>
+        <div class="atlas-subtitle">选择一条被走过的路径，或成为新的轨迹</div>
+      </div>
+
+      <div id="constellation"></div>
+    </div>
+
+    <!-- 通道层：打开的书页 -->
+    <div id="open-page">
+      <div class="page-header">
+        <div>
+          <div class="page-location" id="page-location">通道标题</div>
+          <div class="page-coordinates" id="page-coordinates">坐标加载中...</div>
+        </div>
+        <button type="button" id="close-page">← 合上书页</button>
+      </div>
+
+      <div class="page-content" id="page-content-container">
+        <!-- 动态内容将插入这里 -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 藏书票覆盖层 -->
+  <div id="collector-stamp-overlay">
+    <div class="stamp-container">
+      <button class="stamp-close" onclick="closeCollectorStamp()">×</button>
+
+      <div class="stamp-header">
+        <div class="stamp-title">Ex Libris</div>
+        <div class="stamp-subtitle">Channel Summer // 藏书票</div>
+      </div>
+
+      <div class="stamp-visitor-info">
+        <div class="stamp-info-row">
+          <span class="stamp-info-label">访客编号</span>
+          <span class="stamp-info-value" id="stamp-session-id">---</span>
+        </div>
+        <div class="stamp-info-row">
+          <span class="stamp-info-label">访问时长</span>
+          <span class="stamp-info-value" id="stamp-duration">00:00:00</span>
+        </div>
+        <div class="stamp-info-row">
+          <span class="stamp-info-label">探索通道</span>
+          <span class="stamp-info-value" id="stamp-channels-visited">0 / 4</span>
+        </div>
+      </div>
+
+      <div class="stamp-seal-response" id="stamp-seal-section" style="display: none;">
+        <div class="stamp-seal-label">拆封之语</div>
+        <div class="stamp-seal-text" id="stamp-seal-text"></div>
+      </div>
+
+      <div class="stamp-stats">
+        <div class="stamp-stat">
+          <div class="stamp-stat-number" id="stat-traces">0</div>
+          <div class="stamp-stat-label">留下痕迹</div>
+        </div>
+        <div class="stamp-stat">
+          <div class="stamp-stat-number" id="stat-channels">0</div>
+          <div class="stamp-stat-label">探索通道</div>
+        </div>
+        <div class="stamp-stat">
+          <div class="stamp-stat-number" id="stat-words">0</div>
+          <div class="stamp-stat-label">书写字数</div>
+        </div>
+      </div>
+
+      <div class="stamp-traces-section" id="stamp-traces-section">
+        <div class="stamp-section-title">夏日痕迹</div>
+        <div class="stamp-traces-list" id="stamp-traces-list">
+          <!-- 动态填充 -->
+        </div>
+      </div>
+
+      <div class="stamp-poem">
+        "每个夏天都会离开，<br>
+        但有些痕迹永远留在<br>
+        风的褶皱里。"
+      </div>
+
+      <div class="stamp-footer">
+        <div class="stamp-wax-seal">CS</div>
+        <div class="stamp-date" id="stamp-date"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 音乐播放器 -->
+  <div id="music-player">
+    <button class="music-btn" id="music-toggle" onclick="toggleMusic()">
+      <span id="music-icon">▶</span>
+    </button>
+    <div class="music-info">
+      <div class="music-title" id="music-title">选择通道</div>
+      <div class="music-artist" id="music-artist">音乐暂停中</div>
+    </div>
+    <div class="music-progress" id="music-progress" onclick="seekMusic(event)">
+      <div class="music-progress-bar" id="music-progress-bar"></div>
+    </div>
+    <div class="music-volume">
+      <span style="font-size: 10px; color: var(--ink-ghost);">🔊</span>
+      <input type="range" class="music-volume-slider" id="music-volume" min="0" max="100" value="30" onchange="changeVolume(this.value)">
+    </div>
+  </div>
+
+  <!-- 音频元素 -->
+  <audio id="audio-player" preload="none"></audio>
+
+  <!-- JavaScript -->
+  <script>
+    // ============================================
+    // 配置与状态
+    // ============================================
+
+    const CONFIG = {
+      questions: [
+        "在你拆开这封信之前，<br>请<em>留下一个正在消逝的词</em>：",
+        "请描述一种<em>正在褪色的颜色</em>，<br>它曾出现在你的昨日：",
+        "有一个<em>未被寄出的地址</em>，<br>它现在在哪里：",
+        "请留下一个<em>重复了太多次</em>，<br>以至于失去意义的数字："
+      ],
+
+      channels: {
+        contrail: {
+          id: 'contrail',
+          title: '飞机云',
+          subtitle: 'CHEMTRAILS OVER THE COUNTRY CLUB',
+          type: 'chemtrails',
+          content: {
+            collagePhotos: [
+              { src: '/mnt/kimi/upload/截屏2026-04-07 13.54.40.png', caption: '', class: 'photo-1' },
+              { src: '/mnt/kimi/upload/截屏2026-04-07 13.55.05.png', caption: '', class: 'photo-2' },
+              { src: '/mnt/kimi/upload/截屏2026-04-07 13.55.32.png', caption: '', class: 'photo-3' },
+              { src: '/mnt/kimi/upload/截屏2026-04-07 13.56.01.png', caption: '', class: 'photo-4' },
+              { src: '/mnt/kimi/upload/截屏2026-04-07 13.56.20.png', caption: '', class: 'photo-5' },
+              { src: '/mnt/kimi/upload/截屏2026-04-07 13.57.01.png', caption: '', class: 'photo-6' },
+              { src: '/mnt/kimi/upload/截屏2026-04-07 13.58.24.png', caption: '', class: 'photo-7' }
+            ],
+            typewriterTexts: [
+              { position: 'left', header: 'AIRMAIL // 23 MAY 2021', lines: ['Dear W,', 'Meeting you in the rearview cold.', 'Our warm days bring spring echoes.', 'How to live with intent...'] },
+              { position: 'right', header: 'FIELD NOTES', lines: ['Location: Country Club', 'Time: Golden Hour', 'Mood: Nostalgic', 'Status: On the run'] }
+            ],
+            handwrittenLyrics: [
+              { text: "I'm on the run with you, my sweet love", position: 'top' },
+              { text: "Under the chemtrails over the country club", position: 'bottom' }
+            ],
+            prose: [
+              "你站在乡村俱乐部的露台上，手中握着一杯已经温热的马提尼。天空是那种令人心碎的蓝，蓝得让人想哭泣。",
+              "飞机划过长空，留下一道白色的伤痕。那是化学尾迹，还是某种神秘的信号？你想起她说过的话：我们在上帝之下，却高于这尘世。",
+              "风带来 chlorine 和玫瑰的味道。这是加州的夏天，永恒的、金色的、正在消逝的。你感觉自己也在蒸发，变成天空的一部分。"
+            ],
+            quotes: [
+              "I'm not bored or unhappy, I'm just so extreme",
+              "We wear our diamonds on the tennis court",
+              "It's beautiful how this deep normality settles down over me"
+            ]
+          },
+          prompt: "永恒蓝天下，你最想要忘记的是，最想要记住的是："
+        },
+        lemontree: {
+          id: 'lemontree',
+          title: '柠檬树',
+          subtitle: 'CARRIE & LOWELL',
+          type: 'p5',
+          sketch: 'lemonSketch',
+          prose: {
+            paragraphs: [
+              "那个夏天，俄勒冈的梨树挂满了未熟的果实。你站在后院的阴影里，手指抚过粗糙的树皮，试图从年轮中读取母亲的温度。",
+              "你原谅了她。在那个阳光刺眼的午后，当光晕穿过叶片，在地面投下斑驳的十字架。没有阴影的十字架下，你终于学会了呼吸。",
+              "你想要好起来。在柠檬树的阴影里，在金色桶子的幻梦中。所有的道路都通向终结，但此刻，请让我靠近你，哪怕只是片刻。"
+            ],
+            quote: "The only thing that keeps me from driving this car over the side of the road into the ocean is the love of my beloved",
+            accentColor: '#8fa68e',
+            textColor: '#5a5045',
+            bgGradient: 'linear-gradient(180deg, rgba(250,248,240,0) 0%, rgba(245,242,235,0.98) 10%, rgba(240,236,228,0.98) 100%)'
+          },
+          prompt: "那个夏日午后，你站在树荫下想起的某个人："
+        },
+        highway: {
+          id: 'highway',
+          title: '高速公路',
+          subtitle: 'BLONDE',
+          type: 'p5',
+          sketch: 'speedSketch',
+          prose: {
+            paragraphs: [
+              "后视镜里的世界正在缩小。你以为速度可以稀释思念，但每一个出口都通向同一个目的地——那个你试图逃离的自己。",
+              "他的眼睛在暮色中扩张，像两颗即将溺水的月亮。你们共享着某种无法命名的恐惧：关于成长，关于那些注定会失去的东西。",
+              "在另一个维度里，你们一定更高大。不受这具身体的束缚，不被这个夏天定义。但此刻，你们只是两个在公路上漂移的影子，等待着黎明的赦免。"
+            ],
+            quote: "I'm sure we're taller in another dimension. You say we're small and not worth the mention",
+            accentColor: '#d4a5a5',
+            textColor: '#5a4550',
+            bgGradient: 'linear-gradient(180deg, rgba(255,240,245,0) 0%, rgba(255,235,240,0.98) 10%, rgba(250,230,235,0.98) 100%)'
+          },
+          prompt: "十六岁夏天，你想要逃离的是："
+        },
+        pool: {
+          id: 'pool',
+          title: '泳池',
+          subtitle: 'DREAMLAND',
+          type: 'p5',
+          sketch: 'dreamlandPoolSketch',
+          prose: {
+            paragraphs: [
+              "水下的世界安静得令人窒息。氯气的刺痛让你想起那些从未说出口的告白，那些在热浪中蒸发的秘密。",
+              "西瓜汁的吻在舌尖留下痕迹。你闭上眼睛，让水流带走时间——Dunkaroos的甜腻、Kodak胶片的颗粒、以及那个在得克萨斯州试图理解世界的男孩。",
+              "当你浮出水面，世界变得震耳欲聋。但在这震耳欲聋中，你找到了某种奇异的平静：就像那个人从未离开你，蓬勃的爱意仍在热浪中蒸腾。"
+            ],
+            quote: "Pulling down backstreets deep in your head, slipping through dreamland like a tourist",
+            accentColor: '#7a9eb8',
+            textColor: '#4a5568',
+            bgGradient: 'linear-gradient(180deg, rgba(240,248,255,0) 0%, rgba(235,245,255,0.98) 10%, rgba(230,242,252,0.98) 100%)'
+          },
+          prompt: "你上一次跃入水中，隔绝外界声音只为倾听自己心声的时刻："
+        }
+      }
+    };
+
+    const State = {
+      sessionId: null,
+      startTime: Date.now(),
+      currentLayer: 'seal',
+      currentChannel: null,
+      sealResponse: null,
+      channelTraces: {},
+      visited: [],
+      p5Instance: null,
+      sealBroken: false
+    };
+
+    // ============================================
+    // 初始化
+    // ============================================
+
+    document.addEventListener('DOMContentLoaded', init);
+
+    function init() {
+      State.sessionId = generateId();
+      const q = CONFIG.questions[Math.floor(Math.random() * CONFIG.questions.length)];
+      document.getElementById('seal-question').innerHTML = q;
+      updateMarginalia();
+      initSummerMemory();
+      setInterval(updateTime, 1000);
+      const input = document.getElementById('ink-input');
+      input.addEventListener('keypress', (e) => { if (e.key === 'Enter') dissolveSeal(); });
+      input.focus();
+      window.addEventListener('scroll', () => {
+        const top = document.getElementById('top-matter');
+        if (window.scrollY > 100) top.classList.add('visible');
+        else top.classList.remove('visible');
+      });
+      const closeBtn = document.getElementById('close-page');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          closePage();
+        });
+      }
+      initTraces();
+    }
+
+    function generateId() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let id = '';
+      for (let i = 0; i < 8; i++) id += chars[Math.floor(Math.random() * chars.length)];
+      return id;
+    }
+
+    function updateTime() {
+      const elapsed = Date.now() - State.startTime;
+      const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
+      const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
+      const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+      document.getElementById('time-elapsed').textContent = `${h}:${m}:${s}`;
+    }
+
+    function updateMarginalia() {
+      const words = ['未寄出的', '第17次', '褪色的', '凌晨三点', '后视镜', '冷却的'];
+      document.getElementById('marginalia').innerHTML = '此前经过此地的人留下了：' + 
+        words.map(w => `<span class="faded-word">${w}</span>`).join('');
+    }
+
+    // ============================================
+    // 夏日纯白空气背景
+    // ============================================
+
+    function initSummerMemory() {
+      const canvas = document.getElementById('memory-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+      function drawLightTexture() {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < 30; i++) {
+          const x = Math.random() * canvas.width;
+          const y = Math.random() * canvas.height;
+          const r = Math.random() * 150 + 80;
+          const opacity = Math.random() * 0.03;
+          const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+          g.addColorStop(0, `rgba(255, 248, 220, ${opacity})`);
+          g.addColorStop(0.5, `rgba(255, 245, 230, ${opacity * 0.5})`);
+          g.addColorStop(1, 'transparent');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      drawLightTexture();
+      initLightParticles();
+    }
+
+    function initLightParticles() {
+      const container = document.getElementById('light-particles');
+      if (!container) return;
+      for (let i = 0; i < 25; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'light-particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+        container.appendChild(particle);
+      }
+    }
+
+    // ============================================
+    // 核心功能：拆封
+    // ============================================
+
+    function dissolveSeal() {
+      if (State.sealBroken) return;
+      const input = document.getElementById('ink-input');
+      const value = input.value.trim();
+      if (!value || value.length < 1) {
+        input.classList.add('error');
+        setTimeout(() => input.classList.remove('error'), 500);
+        return;
+      }
+      State.sealBroken = true;
+      State.sealResponse = value;
+      document.getElementById('wax-seal').classList.add('cracked');
+      setTimeout(() => {
+        document.getElementById('threshold-seal').classList.add('dissolved');
+        setTimeout(() => {
+          document.getElementById('threshold-seal').style.display = 'none';
+          revealAtlas();
+        }, 800);
+      }, 600);
+    }
+
+    function revealAtlas() {
+      State.currentLayer = 'atlas';
+      const atlas = document.getElementById('star-atlas');
+      atlas.style.display = 'block';
+      atlas.offsetHeight;
+      atlas.classList.add('revealed');
+      renderConstellation();
+    }
+
+    // ============================================
+    // 星图渲染
+    // ============================================
+
+    function initTraces() {
+      const samples = ['假装在听', '耳鸣', '后视镜', '不敢睁眼', '冷却的咖啡', '未发送', '第17次经过', '凌晨三点'];
+      Object.keys(CONFIG.channels).forEach(key => {
+        CONFIG.channels[key].traces = [];
+        for (let i = 0; i < 5; i++) {
+          let text;
+          if (key === 'contrail') text = '宝贝，你是什么星座...';
+          else if (key === 'lemontree') text = '我原谅你了，妈妈。';
+          else if (key === 'highway') text = '美好的十六岁，我又懂得多少。';
+          else if (key === 'pool') text = '热浪蒙蔽我的双眼。';
+          else text = samples[Math.floor(Math.random() * samples.length)];
+          CONFIG.channels[key].traces.push({ text: text, time: Date.now() - Math.random() * 86400000, isOwn: false });
+        }
+      });
+    }
+
+    function renderConstellation() {
+      const container = document.getElementById('constellation');
+      container.innerHTML = '';
+      Object.values(CONFIG.channels).forEach((ch, idx) => {
+        const div = document.createElement('div');
+        div.className = 'star-entry';
+        div.setAttribute('data-channel', ch.id);
+        const lastTrace = ch.traces[ch.traces.length - 1];
+        div.innerHTML = `
+          <div class="entry-number">${String(idx + 1).padStart(2, '0')}</div>
+          <div class="entry-title">${ch.title}</div>
+          <div class="entry-type">${ch.type} // ${ch.subtitle}</div>
+          <div class="entry-trace">${lastTrace ? lastTrace.text : '暂无痕迹'}</div>
+        `;
+        div.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          openChannel(ch.id);
+        });
+        div.addEventListener('touchend', function(e) {
+          e.preventDefault();
+          openChannel(ch.id);
+        });
+        container.appendChild(div);
+      });
+    }
+
+    // ============================================
+    // 通道打开逻辑
+    // ============================================
+
+    function openChannel(channelId) {
+      const ch = CONFIG.channels[channelId];
+      if (!ch) return;
+      State.currentChannel = channelId;
+      State.currentLayer = 'page';
+      State.visited.push(channelId);
+
+      const visitCount = State.visited.filter(id => id === channelId).length;
+      if (visitCount === 1) {
+        console.log(`[Channel Summer] 首次进入通道: ${ch.title}`);
+      }
+      const atlas = document.getElementById('star-atlas');
+      atlas.classList.remove('revealed');
+      setTimeout(() => {
+        atlas.style.display = 'none';
+        const page = document.getElementById('open-page');
+        page.style.display = 'block';
+        void page.offsetHeight;
+        page.classList.add('visible');
+        document.getElementById('page-location').textContent = ch.title;
+        document.getElementById('page-coordinates').textContent = 
+          `${ch.subtitle} | ${ch.type.toUpperCase()} | ${new Date().toLocaleTimeString()}`;
+        const container = document.getElementById('page-content-container');
+        container.innerHTML = '';
+        if (State.p5Instance) {
+          State.p5Instance.remove();
+          State.p5Instance = null;
+        }
+        if (ch.type === 'chemtrails') {
+          renderChemtrailsContent(ch, container);
+        } else if (ch.type === 'text') {
+          renderTextContent(ch, container);
+        } else if (ch.type === 'p5') {
+          renderP5Content(ch, container);
+        }
+      }, 600);
+    }
+
+    // ============================================
+    // 板块渲染函数
+    // ============================================
+
+    function renderChemtrailsContent(ch, container) {
+      const content = ch.content;
+      const mainDiv = document.createElement('div');
+      mainDiv.className = 'chemtrails-content';
+      const heroDiv = document.createElement('div');
+      heroDiv.className = 'chemtrails-hero-collage';
+      const p5Div = document.createElement('div');
+      p5Div.className = 'chemtrails-p5-bg';
+      p5Div.id = 'chemtrails-p5-canvas';
+      heroDiv.appendChild(p5Div);
+      content.collagePhotos.forEach(photo => {
+        const photoDiv = document.createElement('div');
+        photoDiv.className = `collage-photo ${photo.class}`;
+        photoDiv.innerHTML = `<img src="${photo.src}" alt="${photo.caption}" loading="lazy">`;
+        heroDiv.appendChild(photoDiv);
+      });
+      content.typewriterTexts.forEach((text, idx) => {
+        const typeDiv = document.createElement('div');
+        typeDiv.className = `typewriter-layer typewriter-text ${text.position}`;
+        typeDiv.style.animationDelay = `${idx * 0.5}s`;
+        const header = document.createElement('div');
+        header.className = 'typewriter-header';
+        header.textContent = text.header;
+        typeDiv.appendChild(header);
+        text.lines.forEach((line, lineIdx) => {
+          const lineDiv = document.createElement('div');
+          lineDiv.className = 'typewriter-line';
+          lineDiv.style.animationDelay = `${0.5 + lineIdx * 0.3}s`;
+          lineDiv.textContent = line;
+          typeDiv.appendChild(lineDiv);
+        });
+        heroDiv.appendChild(typeDiv);
+      });
+      content.handwrittenLyrics.forEach(lyric => {
+        const lyricDiv = document.createElement('div');
+        lyricDiv.className = `handwritten-lyric ${lyric.position}`;
+        lyricDiv.textContent = lyric.text;
+        heroDiv.appendChild(lyricDiv);
+      });
+      const stampDiv = document.createElement('div');
+      stampDiv.className = 'collage-stamp top-right';
+      stampDiv.innerHTML = 'COTCC<br>2021';
+      heroDiv.appendChild(stampDiv);
+      const scrollHint = document.createElement('div');
+      scrollHint.className = 'scroll-hint';
+      scrollHint.innerHTML = `
+        <div class="scroll-hint-text">SCROLL</div>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 5v14M19 12l-7 7-7-7"/>
+        </svg>
+      `;
+      heroDiv.appendChild(scrollHint);
+      mainDiv.appendChild(heroDiv);
+      const proseSection = document.createElement('div');
+      proseSection.className = 'chemtrails-prose-section';
+      const proseDiv = document.createElement('div');
+      proseDiv.className = 'chemtrails-prose';
+      content.prose.forEach(para => {
+        const p = document.createElement('p');
+        p.textContent = para;
+        proseDiv.appendChild(p);
+      });
+      const quoteDiv = document.createElement('div');
+      quoteDiv.className = 'chemtrails-quote-block';
+      quoteDiv.textContent = content.quotes[Math.floor(Math.random() * content.quotes.length)];
+      proseDiv.appendChild(quoteDiv);
+      proseSection.appendChild(proseDiv);
+      mainDiv.appendChild(proseSection);
+      addMarginSection(ch, mainDiv);
+      container.appendChild(mainDiv);
+      setTimeout(() => {
+        State.p5Instance = new p5(chemtrailsSketch, 'chemtrails-p5-canvas');
+      }, 100);
+    }
+
+    function renderTextContent(ch, container) {
+      const passage = document.createElement('div');
+      passage.className = 'prose-passage';
+      passage.style.maxWidth = '680px';
+      passage.style.margin = '0 auto';
+      passage.style.padding = '80px 40px';
+      ch.content.forEach((para, pIdx) => {
+        const p = document.createElement('p');
+        const chars = para.split('');
+        chars.forEach((char, i) => {
+          const span = document.createElement('span');
+          span.className = 'fading-char';
+          span.textContent = char;
+          p.appendChild(span);
+          if (Math.random() > 0.75) {
+            setTimeout(() => span.classList.add('vanish'), 6000 + Math.random() * 12000);
+          }
+        });
+        passage.appendChild(p);
+      });
+      container.appendChild(passage);
+      addMarginSection(ch, container);
+    }
+
+    function renderP5Content(ch, container) {
+      const fullscreenDiv = document.createElement('div');
+      fullscreenDiv.className = 'p5-fullscreen-container';
+      fullscreenDiv.id = 'p5-fullscreen-wrapper';
+      const p5Div = document.createElement('div');
+      p5Div.id = 'p5-container';
+      fullscreenDiv.appendChild(p5Div);
+      container.appendChild(fullscreenDiv);
+      
+      const contentWrapper = document.createElement('div');
+      contentWrapper.className = 'p5-content-wrapper';
+      
+      const proseSection = document.createElement('div');
+      proseSection.className = 'chemtrails-prose-section p5-prose-section';
+      proseSection.style.background = ch.prose.bgGradient;
+      proseSection.style.width = '100vw';
+      proseSection.style.marginLeft = 'calc(-50vw + 50%)';
+      proseSection.style.padding = '100px 0 60px';
+      
+      const proseDiv = document.createElement('div');
+      proseDiv.className = 'chemtrails-prose';
+      proseDiv.style.background = 'rgba(255,255,255,0.95)';
+      proseDiv.style.borderColor = ch.prose.accentColor;
+      
+      ch.prose.paragraphs.forEach(para => {
+        const p = document.createElement('p');
+        p.textContent = para;
+        p.style.color = ch.prose.textColor;
+        proseDiv.appendChild(p);
+      });
+      
+      const quoteDiv = document.createElement('div');
+      quoteDiv.className = 'chemtrails-quote-block';
+      quoteDiv.style.borderLeftColor = ch.prose.accentColor;
+      quoteDiv.style.background = `linear-gradient(90deg, ${ch.prose.accentColor}15 0%, transparent 100%)`;
+      quoteDiv.textContent = ch.prose.quote;
+      proseDiv.appendChild(quoteDiv);
+      
+      proseSection.appendChild(proseDiv);
+      contentWrapper.appendChild(proseSection);
+      
+      addMarginSection(ch, contentWrapper);
+      container.appendChild(contentWrapper);
+      
+      setTimeout(() => {
+        if (window[ch.sketch]) {
+          State.p5Instance = new p5(window[ch.sketch], 'p5-container');
+        }
+      }, 100);
+    }
+
+    function addMarginSection(ch, container) {
+      const marginDiv = document.createElement('div');
+      marginDiv.className = 'reader-margin';
+      if (ch.id) marginDiv.setAttribute('data-channel', ch.id);
+
+      const userTracesCount = State.channelTraces[ch.id] ? State.channelTraces[ch.id].length : 0;
+      const traceHint = userTracesCount > 0 ? 
+        `<div style="font-size: 11px; color: var(--seal); margin-bottom: 15px; font-style: italic;">你在此留下了 ${userTracesCount} 个痕迹</div>` : '';
+
+      marginDiv.innerHTML = `
+        <div class="margin-prompt">${ch.prompt}</div>
+        ${traceHint}
+        <div class="margin-form">
+          <input type="text" id="margin-input" placeholder="在此处书写你的痕迹..." maxlength="100" autocomplete="off">
+          <button type="button" id="leave-trace" onclick="leaveTrace()"><span>钤印</span></button>
+        </div>
+        <div class="ex-libris">
+          <div class="ex-header">Ex Libris // 此前收藏者的痕迹</div>
+          <div id="traces-collection"></div>
+        </div>
+      `;
+      container.appendChild(marginDiv);
+      renderTraces(ch);
+    }
+
+    function renderTraces(ch) {
+      const container = document.getElementById('traces-collection');
+      if (!container) return;
+      container.innerHTML = '';
+      const recent = ch.traces.slice(-12).reverse();
+      recent.forEach((trace, index) => {
+        const stamp = document.createElement('div');
+        stamp.className = 'trace-stamp' + (trace.isOwn ? ' own' : '');
+        let timeStr = '';
+        if (trace.time) {
+          const date = new Date(trace.time);
+          const now = new Date();
+          const diff = now - date;
+          if (diff < 60000) timeStr = '刚刚';
+          else if (diff < 3600000) timeStr = Math.floor(diff/60000) + '分钟前';
+          else if (diff < 86400000) timeStr = Math.floor(diff/3600000) + '小时前';
+          else timeStr = (date.getMonth()+1) + '/' + date.getDate();
+        }
+        stamp.setAttribute('data-time', timeStr);
+        stamp.textContent = trace.text.substring(0, 50);
+        stamp.style.opacity = '0';
+        stamp.style.transform = 'translateX(-10px)';
+        container.appendChild(stamp);
+        setTimeout(() => {
+          stamp.style.transition = 'all 0.5s ease';
+          stamp.style.opacity = trace.isOwn ? '1' : '0.85';
+          stamp.style.transform = 'translateX(0)';
+        }, index * 80);
+      });
+    }
+
+    function leaveTrace() {
+      const input = document.getElementById('margin-input');
+      const value = input.value.trim();
+      if (!value || !State.currentChannel) return;
+      const ch = CONFIG.channels[State.currentChannel];
+      const newTrace = { text: value, time: Date.now(), isOwn: true };
+
+      ch.traces.push(newTrace);
+
+      if (!State.channelTraces[State.currentChannel]) {
+        State.channelTraces[State.currentChannel] = [];
+      }
+      State.channelTraces[State.currentChannel].push(value);
+
+      renderTraces(ch);
+      input.value = '';
+      const margin = document.querySelector('.reader-margin');
+      if (margin) {
+        margin.style.background = 'linear-gradient(180deg, rgba(255, 250, 245, 1) 0%, rgba(255, 245, 240, 0.98) 100%)';
+        setTimeout(() => {
+          margin.style.background = '';
+        }, 300);
+      }
+    }
+
+    function closePage() {
+      if (State.p5Instance) {
+        try { State.p5Instance.remove(); } catch (e) {}
+        State.p5Instance = null;
+      }
+      State.currentChannel = null;
+      State.currentLayer = 'atlas';
+      const page = document.getElementById('open-page');
+      page.classList.remove('visible');
+      setTimeout(() => {
+        page.style.display = 'none';
+        document.getElementById('page-content-container').innerHTML = '';
+        const atlas = document.getElementById('star-atlas');
+        atlas.style.display = 'block';
+        void atlas.offsetHeight;
+        atlas.classList.add('revealed');
+        window.scrollTo(0, 0);
+        renderConstellation();
+      }, 600);
+    }
+    // ============================================
+    // P5草图定义
+    // ============================================
+
+    // 飞机云草图
+    window.chemtrailsSketch = function(p) {
+      let clouds = [];
+      let planes = [];
+      let particles = [];
+      let lightLeaks = [];
+      let time = 0;
+      let canvas;
+      let lyrics = [];
+      let lyricsStartTime = 0;
+      let dissolvingLetters = [];
+      let mvImages = [];
+      let polaroids = [];
+
+      const lyricsText = [
+        "You're in the wind, I'm in the water",
+        "Nobody's son, nobody's daughter",
+        "Watching the chemtrails over the country club",
+        "Suburbia, The Brentwood Market",
+        "What to do next? Maybe we'll love it",
+        "White picket chemtrails over the country club"
+      ];
+
+      p.setup = function() {
+        const container = document.getElementById('chemtrails-p5-canvas');
+        if (!container) return;
+        canvas = p.createCanvas(container.offsetWidth, container.offsetHeight);
+        p.pixelDensity(1);
+
+        for (let i = 0; i < lyricsText.length; i++) {
+          lyrics.push({
+            text: lyricsText[i],
+            alpha: 0,
+            targetAlpha: 220,
+            delay: i * 800,
+            y: 0
+          });
+        }
+
+        initMVImages();
+        initPolaroids();
+
+        for (let i = 0; i < 8; i++) {
+          lightLeaks.push({
+            x: p.random(p.width),
+            y: p.random(p.height),
+            size: p.random(100, 300),
+            opacity: p.random(20, 60),
+            pulseSpeed: p.random(0.5, 1.5),
+            phase: p.random(p.TWO_PI)
+          });
+        }
+        for (let i = 0; i < 120; i++) {
+          particles.push({
+            x: p.random(p.width),
+            y: p.random(p.height),
+            size: p.random(1, 4),
+            vx: p.random(-0.3, 0.3),
+            vy: p.random(-0.15, 0.15),
+            alpha: p.random(20, 70),
+            twinkle: p.random(p.TWO_PI)
+          });
+        }
+        spawnPlane();
+
+        lyricsStartTime = p.millis() + 2000;
+      };
+
+      function initMVImages() {
+        const imageData = [
+          {
+            url: 'https://kimi-web-img.moonshot.cn/img/i0.wp.com/6e590c6b30aa3fd125fc941364ccefced0d297f3.jpg',
+            x: 0.78, y: 0.12, w: 200, h: 130,
+            rotation: -0.08, delay: 1000, alpha: 180
+          },
+          {
+            url: 'https://kimi-web-img.moonshot.cn/img/everlastingfabric.com/c2cd95f770a67ef40eb907a8cb4a32db8af517a4.jpg',
+            x: 0.68, y: 0.38, w: 170, h: 170,
+            rotation: 0.05, delay: 1800, alpha: 190
+          },
+          {
+            url: 'https://kimi-web-img.moonshot.cn/img/pyxis.nymag.com/9f94da90efdcc0d57249ea3a3283297a1e7ddc5c.jpg',
+            x: 0.85, y: 0.58, w: 160, h: 110,
+            rotation: -0.12, delay: 2600, alpha: 170
+          },
+          {
+            url: 'https://kimi-web-img.moonshot.cn/img/www.mydomaine.com/6a336e8bac595636dffccef19e201cd56d02ef4e.jpg',
+            x: 0.72, y: 0.78, w: 220, h: 140,
+            rotation: 0.06, delay: 3400, alpha: 160
+          }
+        ];
+
+        for (let i = 0; i < imageData.length; i++) {
+          let img = p.createImg(imageData[i].url, '');
+          img.hide();
+
+          mvImages.push({
+            element: img,
+            x: p.width * imageData[i].x,
+            y: p.height * imageData[i].y,
+            w: imageData[i].w,
+            h: imageData[i].h,
+            rotation: imageData[i].rotation,
+            alpha: 0,
+            targetAlpha: imageData[i].alpha,
+            delay: imageData[i].delay,
+            loaded: false,
+            floatPhase: p.random(p.TWO_PI),
+            floatSpeed: p.random(0.3, 0.8)
+          });
+
+          img.elt.onload = function() {
+            mvImages[i].loaded = true;
+          };
+        }
+      }
+
+      function initPolaroids() {
+        const polaroidData = [
+          { x: 0.62, y: 0.25, rot: -0.25, delay: 1500 },
+          { x: 0.88, y: 0.42, rot: 0.18, delay: 2300 },
+          { x: 0.58, y: 0.65, rot: 0.22, delay: 3100 },
+          { x: 0.92, y: 0.72, rot: -0.15, delay: 3900 },
+          { x: 0.65, y: 0.88, rot: 0.1, delay: 4700 }
+        ];
+
+        for (let i = 0; i < polaroidData.length; i++) {
+          polaroids.push({
+            x: p.width * polaroidData[i].x,
+            y: p.height * polaroidData[i].y,
+            w: 100,
+            h: 120,
+            rotation: polaroidData[i].rot,
+            alpha: 0,
+            targetAlpha: p.random(80, 140),
+            delay: polaroidData[i].delay,
+            floatPhase: p.random(p.TWO_PI),
+            color: p.random(['#f5f5f5', '#fafafa', '#fffef0'])
+          });
+        }
+      }
+
+      function spawnPlane() {
+        const y = p.random(p.height * 0.1, p.height * 0.4);
+        planes.push({
+          x: -40,
+          y: y,
+          speed: p.random(0.6, 1.4),
+          trailTimer: 0,
+          wingAngle: 0
+        });
+      }
+
+      p.draw = function() {
+        time += 0.006;
+
+        for (let y = 0; y < p.height; y++) {
+          let inter = p.map(y, 0, p.height, 0, 1);
+          let r = p.lerp(232, 140, inter);
+          let g = p.lerp(221, 175, inter);
+          let b = p.lerp(212, 195, inter);
+          p.stroke(r, g, b);
+          p.line(0, y, p.width, y);
+        }
+
+        p.noStroke();
+        p.blendMode(p.ADD);
+        lightLeaks.forEach(leak => {
+          let pulse = p.sin(time * leak.pulseSpeed + leak.phase) * 0.5 + 0.5;
+          let currentOpacity = leak.opacity * pulse;
+          let g = p.drawingContext.createRadialGradient(
+            leak.x, leak.y, 0,
+            leak.x, leak.y, leak.size
+          );
+          g.addColorStop(0, `rgba(255, 250, 240, ${currentOpacity/255})`);
+          g.addColorStop(0.5, `rgba(255, 245, 230, ${currentOpacity*0.5/255})`);
+          g.addColorStop(1, 'transparent');
+          p.drawingContext.fillStyle = g;
+          p.circle(leak.x, leak.y, leak.size * 2);
+          leak.x += p.sin(time * 0.2 + leak.phase) * 0.3;
+          leak.y += p.cos(time * 0.15 + leak.phase) * 0.2;
+        });
+        p.blendMode(p.BLEND);
+
+        drawMVImages();
+        drawPolaroids();
+
+        particles.forEach(pt => {
+          pt.x += pt.vx + p.sin(time + pt.y * 0.01) * 0.15;
+          pt.y += pt.vy;
+          pt.twinkle += 0.02;
+          if (pt.x < 0) pt.x = p.width;
+          if (pt.x > p.width) pt.x = 0;
+          if (pt.y < 0) pt.y = p.height;
+          if (pt.y > p.height) pt.y = 0;
+          let twinkleAlpha = pt.alpha + p.sin(pt.twinkle) * 20;
+          p.fill(255, 255, 245, twinkleAlpha);
+          p.noStroke();
+          p.circle(pt.x, pt.y, pt.size);
+        });
+
+        for (let i = clouds.length - 1; i >= 0; i--) {
+          let cloud = clouds[i];
+          cloud.x += cloud.vx + p.sin(time * 0.5 + cloud.y * 0.01) * 0.08;
+          cloud.y += cloud.vy;
+          cloud.life -= 0.6;
+          cloud.size += 0.12;
+          cloud.opacity = p.map(cloud.life, 0, 255, 0, cloud.maxOpacity);
+          if (cloud.life <= 0) {
+            clouds.splice(i, 1);
+            continue;
+          }
+          let steps = 10;
+          for (let j = 0; j < steps; j++) {
+            let ratio = j / steps;
+            let alpha = cloud.opacity * (1 - ratio) * 0.25;
+            let size = cloud.size * (1 + ratio * 0.6);
+            let offsetX = p.sin(time * 2 + j) * (j * 0.5);
+            let offsetY = p.cos(time * 1.5 + j) * (j * 0.3);
+            p.fill(255, 255, 252, alpha);
+            p.circle(cloud.x + offsetX, cloud.y + offsetY, size);
+          }
+        }
+
+        for (let i = planes.length - 1; i >= 0; i--) {
+          let plane = planes[i];
+          plane.x += plane.speed;
+          plane.trailTimer++;
+          plane.wingAngle = p.sin(time * 3) * 0.05;
+          if (plane.trailTimer % 2 === 0) {
+            clouds.push({
+              x: plane.x - 5,
+              y: plane.y + 3,
+              vx: p.random(-0.08, 0.08),
+              vy: p.random(0.01, 0.04),
+              size: p.random(10, 18),
+              life: 180 + p.random(60),
+              maxOpacity: p.random(80, 130)
+            });
+            clouds.push({
+              x: plane.x + 5,
+              y: plane.y + 3,
+              vx: p.random(-0.08, 0.08),
+              vy: p.random(0.01, 0.04),
+              size: p.random(10, 18),
+              life: 180 + p.random(60),
+              maxOpacity: p.random(80, 130)
+            });
+          }
+          p.push();
+          p.translate(plane.x, plane.y);
+          p.rotate(plane.wingAngle);
+          p.noStroke();
+          p.fill(100, 110, 120, 40);
+          p.ellipse(2, 2, 22, 7);
+          p.fill(140, 145, 150, 180);
+          p.ellipse(0, 0, 20, 6);
+          p.fill(130, 135, 140, 160);
+          p.ellipse(-2, 0, 6, 16);
+          p.fill(120, 125, 130, 170);
+          p.ellipse(-8, -2, 4, 5);
+          p.pop();
+          if (plane.x > p.width + 40) {
+            planes.splice(i, 1);
+          }
+        }
+        if (p.random(1) < 0.002 && planes.length < 2) {
+          spawnPlane();
+        }
+
+        let vignette = p.drawingContext.createRadialGradient(
+          p.width/2, p.height/2, p.height * 0.25,
+          p.width/2, p.height/2, p.height * 0.9
+        );
+        vignette.addColorStop(0, 'transparent');
+        vignette.addColorStop(1, 'rgba(160, 140, 120, 0.12)');
+        p.drawingContext.fillStyle = vignette;
+        p.noStroke();
+        p.rect(0, 0, p.width, p.height);
+
+        drawLyrics();
+        drawDissolvingLetters();
+
+        if (p.mouseIsPressed) {
+          for (let k = 0; k < 5; k++) {
+            clouds.push({
+              x: p.mouseX + p.random(-40, 40),
+              y: p.mouseY + p.random(-40, 40),
+              vx: p.random(-0.15, 0.15),
+              vy: p.random(-0.08, 0.08),
+              size: p.random(50, 100),
+              life: 120,
+              maxOpacity: p.random(60, 100)
+            });
+          }
+        }
+      };
+
+      function drawMVImages() {
+        let currentTime = p.millis();
+
+        mvImages.forEach((img, index) => {
+          if (!img.loaded) return;
+
+          if (currentTime > lyricsStartTime + img.delay) {
+            if (img.alpha < img.targetAlpha) {
+              img.alpha += 1.5;
+            }
+
+            let floatY = p.sin(time * img.floatSpeed + img.floatPhase) * 8;
+
+            p.push();
+            p.translate(img.x, img.y + floatY);
+            p.rotate(img.rotation + p.sin(time * 0.5 + index) * 0.015);
+
+            p.fill(0, 0, 0, 25);
+            p.rect(10, 10, img.w, img.h);
+
+            p.tint(255, img.alpha);
+            p.image(img.element, 0, 0, img.w, img.h);
+            p.noTint();
+
+            p.fill(232, 221, 212, 30);
+            p.rect(0, 0, img.w, img.h);
+
+            p.pop();
+          }
+        });
+      }
+
+      function drawPolaroids() {
+        let currentTime = p.millis();
+
+        polaroids.forEach((pol, index) => {
+          if (currentTime > lyricsStartTime + pol.delay) {
+            if (pol.alpha < pol.targetAlpha) {
+              pol.alpha += 1.2;
+            }
+
+            let floatY = p.sin(time * 0.4 + pol.floatPhase) * 12;
+
+            p.push();
+            p.translate(pol.x, pol.y + floatY);
+            p.rotate(pol.rotation);
+
+            p.fill(0, 0, 0, 15);
+            p.rect(4, 4, pol.w, pol.h);
+
+            p.fill(pol.color);
+            p.rect(0, 0, pol.w, pol.h);
+
+            let photoGradient = p.drawingContext.createLinearGradient(
+              8, 8, pol.w - 16, pol.h - 32
+            );
+            photoGradient.addColorStop(0, `rgba(200, 180, 160, ${pol.alpha/255})`);
+            photoGradient.addColorStop(0.5, `rgba(180, 160, 140, ${pol.alpha/255})`);
+            photoGradient.addColorStop(1, `rgba(160, 140, 120, ${pol.alpha/255})`);
+            p.drawingContext.fillStyle = photoGradient;
+            p.rect(8, 8, pol.w - 16, pol.h - 32);
+
+            p.fill(120, 120, 120, pol.alpha * 0.6);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.textSize(7);
+            p.textStyle(p.NORMAL);
+            p.text('COTCC', pol.w/2, pol.h - 12);
+
+            p.pop();
+          }
+        });
+      }
+
+      function drawLyrics() {
+        let currentTime = p.millis();
+
+        let margin = p.width * 0.04;
+        let lyricsX = margin;
+        let lyricsY = p.height * 0.52;
+
+        p.push();
+
+        p.textAlign(p.LEFT, p.TOP);
+        p.textFont('Georgia');
+        p.textSize(17);
+        p.textStyle(p.ITALIC);
+
+        let lineHeight = 26;
+
+        for (let i = 0; i < lyrics.length; i++) {
+          let line = lyrics[i];
+
+          let lineStartTime = lyricsStartTime + line.delay;
+
+          if (currentTime > lineStartTime) {
+            let fadeProgress = p.map(currentTime, lineStartTime, lineStartTime + 1000, 0, 1, true);
+            fadeProgress = 1 - Math.pow(1 - fadeProgress, 3);
+            line.alpha = fadeProgress * line.targetAlpha;
+          }
+
+          let baseColor = 75 + i * 8;
+          let y = lyricsY + i * lineHeight;
+
+          p.fill(255, 255, 255, line.alpha * 0.25);
+          p.text(line.text, lyricsX + 1, y + 1);
+
+          p.fill(baseColor, baseColor - 8, baseColor - 15, line.alpha);
+          p.text(line.text, lyricsX, y);
+
+          if (line.alpha > 100 && p.random(1) < 0.018) {
+            let charIndex = Math.floor(p.random(line.text.length));
+            let char = line.text[charIndex];
+            if (char !== ' ') {
+              let charWidth = p.textWidth(line.text.substring(0, charIndex));
+              let letterX = lyricsX + charWidth;
+              let letterY = y;
+
+              dissolvingLetters.push({
+                char: char,
+                x: letterX,
+                y: letterY,
+                vx: p.random(-0.5, 0.5),
+                vy: p.random(-0.3, -0.8),
+                alpha: line.alpha,
+                size: 17,
+                rotation: p.random(-0.2, 0.2),
+                rotSpeed: p.random(-0.02, 0.02),
+                life: 1.0,
+                decay: p.random(0.005, 0.015),
+                color: [baseColor, baseColor - 8, baseColor - 15]
+              });
+            }
+          }
+        }
+
+        p.pop();
+      }
+
+      function drawDissolvingLetters() {
+        p.push();
+        p.textFont('Georgia');
+        p.textSize(17);
+        p.textStyle(p.ITALIC);
+        p.textAlign(p.LEFT, p.TOP);
+
+        for (let i = dissolvingLetters.length - 1; i >= 0; i--) {
+          let letter = dissolvingLetters[i];
+
+          letter.x += letter.vx;
+          letter.y += letter.vy;
+          letter.rotation += letter.rotSpeed;
+          letter.life -= letter.decay;
+          letter.alpha = letter.life * 220;
+
+          if (letter.life <= 0) {
+            dissolvingLetters.splice(i, 1);
+            continue;
+          }
+
+          p.push();
+          p.translate(letter.x, letter.y);
+          p.rotate(letter.rotation);
+
+          let blurAmount = (1 - letter.life) * 4;
+          if (blurAmount > 0) {
+            p.drawingContext.filter = `blur(${blurAmount}px)`;
+          }
+
+          p.fill(letter.color[0], letter.color[1], letter.color[2], letter.alpha);
+          p.text(letter.char, 0, 0);
+
+          p.fill(letter.color[0], letter.color[1], letter.color[2], letter.alpha * 0.25);
+          p.text(letter.char, 1, 1);
+
+          p.drawingContext.filter = 'none';
+          p.pop();
+        }
+
+        p.pop();
+      }
+
+      p.windowResized = function() {
+        const container = document.getElementById('chemtrails-p5-canvas');
+        if (container) {
+          p.resizeCanvas(container.offsetWidth, container.offsetHeight);
+        }
+      };
+    };
+
+    // ============================================
+    // 高速公路草图 - 增强版（鼠标Y轴控制速度）
+    // ============================================
+    window.speedSketch = function(p) {
+      let time = 0;
+      let canvas;
+      let lyrics = [];
+      let lyricsStartTime = 0;
+      let floatingLyrics = [];
+      let roadLines = [];
+
+      let currentSpeedKmh = 0;
+      let targetSpeedKmh = 0;
+      let displaySpeedKmh = 0;
+      let speedDisplayOpacity = 255;
+      let lastMouseMoveTime = 0;
+
+      const MIN_SPEED_KMH = 0;
+      const MAX_SPEED_KMH = 180;
+      const SPEED_DISPLAY_X = 0.88;
+      const SPEED_DISPLAY_Y = 0.06;
+
+      const lyricsData = [
+        { text: "Nikes", lines: ["These bitches want Nikes", "They looking for a check", "Tell em it ain't likely", "We gon see the future first"], delay: 0 },
+        { text: "Ivy", lines: ["I thought that I was dreaming", "When you said you love me", "The start of nothing", "I could hate you now"], delay: 8000 },
+        { text: "Pink + White", lines: ["Yeah, yeah yeah", "That's the way every day goes", "Every time we've no control", "If the sky is pink and white"], delay: 16000 },
+        { text: "Be Yourself", lines: ["Many college students have gone to college", "And gotten hooked on drugs", "Be yourself and know", "That's good enough"], delay: 24000 },
+        { text: "Solo", lines: ["Hand me a towel", "I'm dirty dancing by myself", "Gone off tabs of that acid", "In the desert, in the desert"], delay: 32000 },
+        { text: "Skyline To", lines: ["This is joy, this is summer", "Keep alive, stay alive", "That's a pretty fucking fast year", "Flew by"], delay: 40000 },
+        { text: "Self Control", lines: ["Pool side convo", "About your summer last night", "Could I make it shine", "On it last night"], delay: 48000 },
+        { text: "Good Guy", lines: ["It's a good guy", "He hooked it up", "Here's to the gay bar", "You took me to"], delay: 56000 },
+        { text: "Nights", lines: ["Every night fucks", "Every day up", "Every day patches", "The night up"], delay: 64000 },
+        { text: "Solo (Reprise)", lines: ["After 20 Hours of", "Moving at 16", "You've got to", "Slow down"], delay: 72000 },
+        { text: "Pretty Sweet", lines: ["Now, now, now", "I don't need a slow dance", "Now, now, now", "I don't need a slow dance"], delay: 80000 },
+        { text: "Facebook Story", lines: ["I was just telling", "That I got this girl before", "And we was together", "For four years"], delay: 88000 },
+        { text: "Close to You", lines: ["I will be honest", "I wasn't devastated", "But you could've", "Held my hand"], delay: 96000 },
+        { text: "White Ferrari", lines: ["Bad luck to talk", "On these rides", "Mind on the road", "Your dilated eyes"], delay: 104000 },
+        { text: "Seigfried", lines: ["I'd do anything for you", "In the dark", "In the dark", "Shoreline"], delay: 112000 },
+        { text: "Godspeed", lines: ["I let go of my claim", "On you, it's okay", "You can let it go", "Godspeed"], delay: 120000 },
+        { text: "Futura Free", lines: ["If I was being honest", "I'd say long as I could", "Fuck three times a day", "And not skip a meal"], delay: 128000 },
+        { text: "Futura Free Outro", lines: ["I'm just a guy", "I'm not a God", "Sometimes I feel", "Like I'm a God"], delay: 136000 },
+        { text: "Nikes Outro", lines: ["We're not in love", "But I'll make love to you", "When you're not here", "I'll save some for you"], delay: 144000 },
+        { text: "Ivy Outro", lines: ["It's quite alright", "To hate me now", "When we both know", "Deep down is good"], delay: 152000 },
+        { text: "White Ferrari Outro", lines: ["I'm sure we're taller", "In another dimension", "You say we're smaller", "Not worth the mention"], delay: 160000 },
+        { text: "Seigfried Outro", lines: ["I'm not brave", "I'd rather live outside", "I'd rather live outside", "Than live without"], delay: 168000 },
+        { text: "Godspeed Outro", lines: ["There will be mountains", "You won't move", "Still I'll always be there", "For you"], delay: 176000 },
+        { text: "Blonde", lines: ["Summer's not as long", "As it used to be", "Everyday counts", "Like crazy"], delay: 184000 },
+        { text: "End", lines: ["How far is a light year?", "How far is a light year?", "How far is a light year?", "How far is a light year?"], delay: 192000 }
+      ];
+
+      p.setup = function() {
+        const container = document.getElementById('p5-container');
+        if (!container) return;
+        canvas = p.createCanvas(container.offsetWidth, container.offsetHeight);
+        p.pixelDensity(1);
+
+        initFloatingLyrics();
+        initRoadLines();
+        lyricsStartTime = p.millis() + 2000;
+        lastMouseMoveTime = p.millis();
+      };
+
+      function initFloatingLyrics() {
+        floatingLyrics = lyricsData.map((data, index) => ({
+          ...data,
+          x: p.random(p.width * 0.15, p.width * 0.85),
+          y: p.height + 80 + index * 60,
+          targetY: p.random(p.height * 0.2, p.height * 0.7),
+          alpha: 0,
+          driftX: p.random(-0.2, 0.2),
+          driftY: p.random(-0.6, -0.3),
+          state: 'waiting',
+          startTime: lyricsStartTime + data.delay,
+          lineHeight: 32,
+          glowPhase: p.random(p.TWO_PI)
+        }));
+      }
+
+      function initRoadLines() {
+        for (let i = 0; i < 20; i++) {
+          roadLines.push({
+            x: p.random(p.width),
+            y: p.random(p.height),
+            length: p.random(30, 80),
+            speed: p.random(2, 5),
+            alpha: p.random(50, 150),
+            width: p.random(1, 3)
+          });
+        }
+      }
+
+      p.draw = function() {
+        time += 0.008;
+
+        updateSpeedFromMouse();
+        currentSpeedKmh = p.lerp(currentSpeedKmh, targetSpeedKmh, 0.08);
+        displaySpeedKmh = p.lerp(displaySpeedKmh, currentSpeedKmh, 0.1);
+
+        drawSunsetBackground();
+        drawRoadEffect();
+        drawSpeedLines();
+        updateAndDrawFloatingLyrics();
+        drawVignette();
+        drawSpeedDisplay();
+      };
+
+      function updateSpeedFromMouse() {
+        let normalizedY = p.constrain(p.mouseY / p.height, 0, 1);
+        targetSpeedKmh = p.map(normalizedY, 0, 1, MAX_SPEED_KMH, MIN_SPEED_KMH);
+
+        if (p.mouseX !== p.pmouseX || p.mouseY !== p.pmouseY) {
+          lastMouseMoveTime = p.millis();
+          speedDisplayOpacity = 255;
+        }
+      }
+
+      function drawSpeedDisplay() {
+        let timeSinceMove = p.millis() - lastMouseMoveTime;
+        if (timeSinceMove > 2000) {
+          speedDisplayOpacity = p.lerp(speedDisplayOpacity, 80, 0.05);
+        }
+
+        if (speedDisplayOpacity < 5) return;
+
+        let x = p.width * SPEED_DISPLAY_X;
+        let y = p.height * SPEED_DISPLAY_Y;
+
+        p.push();
+
+        p.fill(255, 255, 255, speedDisplayOpacity * 0.15);
+        p.stroke(255, 255, 255, speedDisplayOpacity * 0.4);
+        p.strokeWeight(1);
+        p.rect(x - 80, y - 35, 160, 70, 8);
+
+        p.noFill();
+        p.stroke(255, 200, 200, speedDisplayOpacity * 0.3);
+        p.strokeWeight(0.5);
+        p.rect(x - 75, y - 30, 150, 60, 6);
+
+        p.noStroke();
+        p.fill(255, 255, 255, speedDisplayOpacity);
+        p.textAlign(p.CENTER, p.CENTER);
+        p.textFont('Montserrat');
+        p.textSize(36);
+        p.textStyle(p.BOLD);
+
+        let speedText = Math.round(displaySpeedKmh).toString();
+
+        p.fill(200, 150, 150, speedDisplayOpacity * 0.3);
+        p.text(speedText, x + 2, y + 2);
+
+        p.fill(255, 255, 255, speedDisplayOpacity);
+        p.text(speedText, x, y);
+
+        p.fill(255, 255, 255, speedDisplayOpacity * 0.7);
+        p.textSize(11);
+        p.textStyle(p.NORMAL);
+        p.text('km/h', x, y + 22);
+
+        p.fill(255, 255, 255, speedDisplayOpacity * 0.6);
+        p.textSize(9);
+        p.text('CRUISING SPEED', x, y - 22);
+
+        let barWidth = 120;
+        let barHeight = 4;
+        let barX = x - barWidth / 2;
+        let barY = y + 32;
+
+        p.fill(255, 255, 255, speedDisplayOpacity * 0.2);
+        p.noStroke();
+        p.rect(barX, barY, barWidth, barHeight, 2);
+
+        let progress = p.map(displaySpeedKmh, MIN_SPEED_KMH, MAX_SPEED_KMH, 0, barWidth);
+
+        let r, g, b;
+        let speedRatio = displaySpeedKmh / MAX_SPEED_KMH;
+        if (speedRatio < 0.5) {
+          let t = speedRatio * 2;
+          r = p.lerp(100, 150, t);
+          g = p.lerp(180, 255, t);
+          b = p.lerp(255, 150, t);
+        } else {
+          let t = (speedRatio - 0.5) * 2;
+          r = p.lerp(150, 255, t);
+          g = p.lerp(255, 100, t);
+          b = p.lerp(150, 100, t);
+        }
+
+        p.fill(r, g, b, speedDisplayOpacity);
+        p.rect(barX, barY, progress, barHeight, 2);
+
+        p.fill(255, 255, 255, speedDisplayOpacity * 0.5);
+        p.rect(barX, barY, progress, barHeight/2, 2);
+
+        p.pop();
+      }
+
+      function drawSunsetBackground() {
+        for (let y = 0; y < p.height; y++) {
+          let inter = p.map(y, 0, p.height, 0, 1);
+
+          let r, g, b;
+          if (inter < 0.3) {
+            let t = inter / 0.3;
+            r = p.lerp(255, 255, t);
+            g = p.lerp(220, 180, t);
+            b = p.lerp(230, 200, t);
+          } else if (inter < 0.6) {
+            let t = (inter - 0.3) / 0.3;
+            r = 255;
+            g = p.lerp(180, 140, t);
+            b = p.lerp(200, 160, t);
+          } else {
+            let t = (inter - 0.6) / 0.4;
+            r = p.lerp(255, 120, t);
+            g = p.lerp(140, 80, t);
+            b = p.lerp(160, 120, t);
+          }
+
+          p.stroke(r, g, b);
+          p.line(0, y, p.width, y);
+        }
+
+        // 太阳在路的尽头（地平线位置）
+        let sunY = p.height * 0.55;
+        let sunX = p.width * 0.5;
+
+        for (let i = 0; i < 5; i++) {
+          let alpha = 30 - i * 5;
+          p.noStroke();
+          p.fill(255, 200, 150, alpha);
+          p.circle(sunX, sunY, 120 + i * 40);
+        }
+
+        p.fill(255, 220, 180);
+        p.circle(sunX, sunY, 120);
+      }
+
+      function drawRoadEffect() {
+        p.push();
+
+        let roadTop = p.height * 0.6;
+        let roadBottom = p.height;
+        let roadWidthTop = p.width * 0.1;
+        let roadWidthBottom = p.width * 0.8;
+
+        for (let y = roadTop; y < roadBottom; y++) {
+          let inter = p.map(y, roadTop, roadBottom, 0, 1);
+          let roadWidth = p.lerp(roadWidthTop, roadWidthBottom, inter);
+          let centerX = p.width * 0.5;
+
+          let brightness = p.lerp(60, 30, inter);
+          p.stroke(brightness);
+          p.line(centerX - roadWidth/2, y, centerX + roadWidth/2, y);
+        }
+
+        for (let i = 0; i < 8; i++) {
+          let y = p.map(i, 0, 8, roadTop + 50, roadBottom);
+          let inter = p.map(y, roadTop, roadBottom, 0, 1);
+          let lineWidth = p.lerp(2, 15, inter);
+          let lineLength = p.lerp(10, 40, inter);
+
+          p.fill(255, 255, 200, 150);
+          p.noStroke();
+          p.rect(p.width * 0.5 - lineWidth/2, y, lineWidth, lineLength);
+        }
+
+        p.pop();
+      }
+
+      function drawSpeedLines() {
+        p.push();
+        p.stroke(255, 255, 255, 80);
+        p.strokeWeight(1);
+
+        let speedMultiplier = 1 + displaySpeedKmh / MAX_SPEED_KMH * 3;
+
+        for (let i = 0; i < roadLines.length; i++) {
+          let line = roadLines[i];
+
+          line.x -= line.speed * speedMultiplier;
+          if (line.x < -line.length) {
+            line.x = p.width + line.length;
+            line.y = p.random(p.height * 0.6, p.height);
+          }
+
+          p.stroke(255, 255, 220, line.alpha);
+          p.strokeWeight(line.width);
+          p.line(line.x, line.y, line.x + line.length, line.y);
+        }
+
+        p.pop();
+      }
+
+      function updateAndDrawFloatingLyrics() {
+        let currentTime = p.millis();
+
+        floatingLyrics.forEach((lyric, index) => {
+          if (lyric.state === 'waiting' && currentTime > lyric.startTime) {
+            lyric.state = 'rising';
+          }
+
+          if (lyric.state === 'rising') {
+            lyric.y += lyric.driftY * 1.5;
+            lyric.alpha = p.min(lyric.alpha + 4, 255);
+
+            if (lyric.y <= lyric.targetY) {
+              lyric.state = 'floating';
+              lyric.floatStartTime = currentTime;
+            }
+          }
+          else if (lyric.state === 'floating') {
+            lyric.x += lyric.driftX + p.sin(time + index) * 0.3;
+            lyric.y += lyric.driftY * 0.2;
+
+            if (currentTime - lyric.floatStartTime > 6000) {
+              lyric.state = 'fading';
+            }
+          }
+          else if (lyric.state === 'fading') {
+            lyric.x += lyric.driftX;
+            lyric.y += lyric.driftY * 0.8;
+            lyric.alpha -= 1.5;
+
+            if (lyric.alpha <= 0) {
+              lyric.state = 'finished';
+            }
+          }
+
+          if (lyric.alpha > 0 && lyric.state !== 'waiting' && lyric.state !== 'finished') {
+            drawFloatingLyric(lyric);
+          }
+        });
+      }
+
+      function drawFloatingLyric(lyric) {
+        p.push();
+        p.translate(lyric.x, lyric.y);
+
+        let glowIntensity = 20 + p.sin(time * 2 + lyric.glowPhase) * 10;
+
+        p.textAlign(p.CENTER, p.CENTER);
+        p.textFont('Georgia');
+        p.textSize(18);
+        p.textStyle(p.NORMAL);
+
+        let totalHeight = lyric.lines.length * lyric.lineHeight;
+        let startY = -totalHeight / 2 + lyric.lineHeight / 2;
+
+        // 绘制发光效果
+        for (let glowLayer = 3; glowLayer >= 0; glowLayer--) {
+          let glowAlpha = lyric.alpha * (0.3 - glowLayer * 0.08);
+          let glowSize = glowLayer * 3;
+
+          p.fill(255, 255, 255, glowAlpha);
+          p.drawingContext.shadowBlur = glowIntensity + glowLayer * 5;
+          p.drawingContext.shadowColor = 'rgba(255, 255, 255, 0.8)';
+
+          lyric.lines.forEach((line, lineIndex) => {
+            let y = startY + lineIndex * lyric.lineHeight;
+            p.text(line, 0, y);
+          });
+        }
+
+        // 绘制主文字
+        p.drawingContext.shadowBlur = 0;
+        p.fill(255, 255, 255, lyric.alpha);
+
+        lyric.lines.forEach((line, lineIndex) => {
+          let y = startY + lineIndex * lyric.lineHeight;
+          p.text(line, 0, y);
+        });
+
+        // 绘制歌曲名
+        p.fill(255, 255, 255, lyric.alpha * 0.7);
+        p.textSize(11);
+        p.textStyle(p.ITALIC);
+        p.text(lyric.text, 0, startY + totalHeight / 2 + 20);
+
+        p.pop();
+      }
+
+      function drawVignette() {
+        let vignette = p.drawingContext.createRadialGradient(
+          p.width/2, p.height/2, p.height * 0.3,
+          p.width/2, p.height/2, p.height * 0.9
+        );
+        vignette.addColorStop(0, 'transparent');
+        vignette.addColorStop(1, 'rgba(80, 60, 80, 0.25)');
+        p.drawingContext.fillStyle = vignette;
+        p.noStroke();
+        p.rect(0, 0, p.width, p.height);
+      }
+
+      p.windowResized = function() {
+        const container = document.getElementById('p5-container');
+        if (container) {
+          p.resizeCanvas(container.offsetWidth, container.offsetHeight);
+        }
+      };
+    };
+
+    window.dreamlandPoolSketch = function(p) {
+      let tiles = [];
+      let ripples = [];
+      let particles = [];
+      let time = 0;
+      let flamingo = null;
+      let sunSpot = null;
+      let plantShadows = [];
+      let lyrics = [];
+      let lyricParticles = [];
+      let giantLeaves = [];
+      let poolFloats = [];
+
+      const colors = {
+        waterDeep: [120, 200, 255],
+        waterLight: [200, 240, 255],
+        tileBase: [255, 220, 230],
+        tileAccent: [255, 180, 200],
+        neonPink: [255, 105, 180],
+        neonCyan: [0, 255, 255],
+        sunGlow: [255, 200, 150],
+        shadow: [100, 120, 140, 80],
+        flamingoPink: [255, 182, 193],
+        flamingoDark: [255, 105, 180],
+        beakBlack: [30, 30, 30],
+        beakWhite: [255, 255, 255],
+        leafShadow: [60, 80, 60, 40],
+        palmShadow: [40, 60, 50, 35],
+        dreamPurple: [200, 160, 255],
+        dreamPink: [255, 150, 200],
+        dreamCyan: [100, 220, 255],
+        giantLeafDark: [20, 60, 30],
+        giantLeafMid: [40, 100, 50],
+        giantLeafLight: [60, 140, 70],
+        floatPink: [255, 150, 180],
+        floatYellow: [255, 220, 100],
+        floatBlue: [100, 180, 255],
+        floatOrange: [255, 180, 80]
+      };
+
+      const lyricsData = [
+        { text: "Dreamland", album: "Dreamland", delay: 0 },
+        { text: "We float in the pool", album: "Dreamland", delay: 2000 },
+        { text: "With the sound of the waterfall", album: "Dreamland", delay: 4000 },
+        { text: "Space Ghost Coast to Coast", album: "Space Ghost Coast to Coast", delay: 7000 },
+        { text: "I just need the time", album: "Space Ghost Coast to Coast", delay: 9000 },
+        { text: "To get it off my mind", album: "Space Ghost Coast to Coast", delay: 11000 },
+        { text: "Tangerine", album: "Tangerine", delay: 14000 },
+        { text: "As soft as a pillow", album: "Tangerine", delay: 16000 },
+        { text: "You were here and then you left", album: "Tangerine", delay: 18000 },
+        { text: "Hot Sugar", album: "Hot Sugar", delay: 21000 },
+        { text: "I think about you all the time", album: "Hot Sugar", delay: 23000 },
+        { text: "Melting on my mind", album: "Hot Sugar", delay: 25000 },
+        { text: "Your Love (Deja Vu)", album: "Your Love (Deja Vu)", delay: 28000 },
+        { text: "I can feel your love", album: "Your Love (Deja Vu)", delay: 30000 },
+        { text: "Your deja vu", album: "Your Love (Deja Vu)", delay: 32000 },
+        { text: "Waterfalls Coming Out Your Mouth", album: "Waterfalls Coming Out Your Mouth", delay: 35000 },
+        { text: "Keep drinking from the fountain", album: "Waterfalls Coming Out Your Mouth", delay: 37000 },
+        { text: "Waterfalls coming out your mouth", album: "Waterfalls Coming Out Your Mouth", delay: 39000 },
+        { text: "It is All So Incredibly Loud", album: "It is All So Incredibly Loud", delay: 42000 },
+        { text: "I can barely hear a sound", album: "It is All So Incredibly Loud", delay: 44000 },
+        { text: "It is all so incredibly loud", album: "It is All So Incredibly Loud", delay: 46000 },
+        { text: "Helium", album: "Helium", delay: 49000 },
+        { text: "Float away with me", album: "Helium", delay: 51000 },
+        { text: "You float away with me", album: "Helium", delay: 53000 }
+      ];
+
+      p.setup = function() {
+        p.createCanvas(p.windowWidth, p.windowHeight);
+        p.pixelDensity(1);
+        initTiles();
+        initFlamingo();
+        initSunSpot();
+        initPlantShadows();
+        initLyrics();
+        initGiantLeaves();
+        initPoolFloats();
+
+        for (let i = 0; i < 50; i++) {
+          particles.push({
+            x: p.random(p.width),
+            y: p.random(p.height),
+            size: p.random(2, 6),
+            vx: p.random(-0.3, 0.3),
+            vy: p.random(-0.2, 0.2),
+            alpha: p.random(30, 80),
+            color: p.random() > 0.5 ? colors.neonPink : colors.neonCyan
+          });
+        }
+
+        lastLyricTime = p.millis();
+      };
+
+      let lastLyricTime = 0;
+
+      function initGiantLeaves() {
+        giantLeaves = [];
+
+        for (let i = 0; i < 8; i++) {
+          giantLeaves.push({
+            x: p.random(-50, 100),
+            y: p.random(p.height * 0.1, p.height * 0.9),
+            size: p.random(150, 280),
+            angle: p.random(-0.3, 0.3),
+            type: 'palm',
+            side: 'left',
+            swaySpeed: p.random(0.005, 0.012),
+            swayPhase: p.random(p.TWO_PI),
+            color: p.random() > 0.5 ? colors.giantLeafDark : colors.giantLeafMid
+          });
+        }
+
+        for (let i = 0; i < 8; i++) {
+          giantLeaves.push({
+            x: p.random(p.width - 100, p.width + 50),
+            y: p.random(p.height * 0.1, p.height * 0.9),
+            size: p.random(150, 280),
+            angle: p.random(-0.3, 0.3),
+            type: 'palm',
+            side: 'right',
+            swaySpeed: p.random(0.005, 0.012),
+            swayPhase: p.random(p.TWO_PI),
+            color: p.random() > 0.5 ? colors.giantLeafDark : colors.giantLeafMid
+          });
+        }
+
+        for (let i = 0; i < 5; i++) {
+          giantLeaves.push({
+            x: p.random(p.width * 0.1, p.width * 0.9),
+            y: p.random(-80, 50),
+            size: p.random(180, 300),
+            angle: p.random(-0.5, 0.5),
+            type: 'monstera',
+            side: 'top',
+            swaySpeed: p.random(0.004, 0.01),
+            swayPhase: p.random(p.TWO_PI),
+            color: colors.giantLeafLight
+          });
+        }
+
+        for (let i = 0; i < 6; i++) {
+          giantLeaves.push({
+            x: p.random(p.width * 0.05, p.width * 0.95),
+            y: p.random(p.height - 80, p.height + 30),
+            size: p.random(160, 260),
+            angle: p.random(-0.4, 0.4),
+            type: 'fern',
+            side: 'bottom',
+            swaySpeed: p.random(0.006, 0.015),
+            swayPhase: p.random(p.TWO_PI),
+            color: colors.giantLeafMid
+          });
+        }
+      }
+
+      function initPoolFloats() {
+        poolFloats = [];
+        const floatTypes = ['ring', 'mattress', 'ball', 'donut', 'unicorn'];
+
+        for (let i = 0; i < 12; i++) {
+          let type = p.random(floatTypes);
+
+          poolFloats.push({
+            x: p.random(p.width * 0.15, p.width * 0.85),
+            y: p.random(p.height * 0.15, p.height * 0.85),
+            size: p.random(40, 90),
+            type: type,
+            color: p.random([colors.floatPink, colors.floatYellow, colors.floatBlue, colors.floatOrange]),
+            vx: p.random(-0.3, 0.3),
+            vy: p.random(-0.2, 0.2),
+            rotation: p.random(p.TWO_PI),
+            rotSpeed: p.random(-0.01, 0.01),
+            floatPhase: p.random(p.TWO_PI),
+            floatSpeed: p.random(0.008, 0.015)
+          });
+        }
+      }
+
+      function initLyrics() {
+        lyrics = lyricsData.map((data, index) => ({
+          ...data,
+          alpha: 0,
+          targetAlpha: 255,
+          x: p.random(p.width * 0.1, p.width * 0.8),
+          y: p.random(p.height * 0.2, p.height * 0.7),
+          floatPhase: p.random(p.TWO_PI),
+          floatSpeed: p.random(0.005, 0.015),
+          ripplePhase: 0,
+          isActive: false,
+          hasRippled: false
+        }));
+      }
+
+      function initPlantShadows() {
+        plantShadows = [];
+        const shadowCount = 12;
+        for (let i = 0; i < shadowCount; i++) {
+          let side = Math.floor(p.random(4));
+          let x, y, angle;
+          switch(side) {
+            case 0:
+              x = p.random(p.width);
+              y = p.random(-50, 100);
+              angle = p.random(p.PI * 0.3, p.PI * 0.7);
+              break;
+            case 1:
+              x = p.random(p.width - 100, p.width + 50);
+              y = p.random(p.height);
+              angle = p.random(p.PI * 0.8, p.PI * 1.2);
+              break;
+            case 2:
+              x = p.random(p.width);
+              y = p.random(p.height - 100, p.height + 50);
+              angle = p.random(-p.PI * 0.3, p.PI * 0.3);
+              break;
+            case 3:
+              x = p.random(-50, 100);
+              y = p.random(p.height);
+              angle = p.random(-p.PI * 0.2, p.PI * 0.2);
+              break;
+          }
+          plantShadows.push({
+            x: x, y: y, baseAngle: angle,
+            swaySpeed: p.random(0.008, 0.025),
+            swayPhase: p.random(p.TWO_PI),
+            leafCount: Math.floor(p.random(5, 12)),
+            leafSize: p.random(40, 80),
+            type: p.random() > 0.5 ? 'palm' : 'fern',
+            opacity: p.random(25, 45)
+          });
+        }
+      }
+
+      function initFlamingo() {
+        flamingo = {
+          x: p.width * 0.82,
+          y: p.height * 0.18,
+          size: 200,
+          rotation: -0.15,
+          floatOffset: 0,
+          floatSpeed: 0.02
+        };
+      }
+
+      function initSunSpot() {
+        sunSpot = {
+          x: p.width * 0.5,
+          y: p.height * 0.5,
+          radius: 150,
+          alpha: 30,
+          pulseSpeed: 0.5
+        };
+      }
+
+      function initTiles() {
+        tiles = [];
+        let tileSize = 40;
+        let rows = p.ceil(p.height / tileSize) + 2;
+        let cols = p.ceil(p.width / tileSize) + 2;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            let isBlue = (r + c) % 2 === 0;
+            let baseColor = isBlue ? 
+              [p.random(100, 140), p.random(180, 220), p.random(240, 255)] :
+              [p.random(240, 255), p.random(220, 240), p.random(230, 245)];
+            tiles.push({
+              x: c * tileSize - tileSize,
+              y: r * tileSize - tileSize,
+              size: tileSize,
+              baseColor: baseColor,
+              distortion: p.random(0, 0.3),
+              wavePhase: p.random(p.TWO_PI)
+            });
+          }
+        }
+      }
+
+      p.draw = function() {
+        time += 0.02;
+
+        if (flamingo) {
+          flamingo.floatOffset = p.sin(time * 1.5) * 6;
+        }
+        if (sunSpot) {
+          sunSpot.alpha = 20 + p.sin(time * sunSpot.pulseSpeed) * 15;
+          sunSpot.x = p.width * 0.5 + p.cos(time * 0.3) * 100;
+          sunSpot.y = p.height * 0.5 + p.sin(time * 0.2) * 80;
+        }
+        plantShadows.forEach(shadow => {
+          shadow.swayPhase += shadow.swaySpeed;
+        });
+
+        drawSkyReflection();
+        drawUnderwaterTiles();
+        drawSunSpotOnPoolFloor();
+        drawPlantShadows();
+        drawGiantLeaves();
+        drawRipples();
+        updateAndDrawPoolFloats();
+        drawLyricsWithRipple();
+        drawLyricParticles();
+        drawParticles();
+        drawFlamingo();
+        drawWaterSurface();
+        updateLyrics();
+
+        if (p.frameCount % 120 === 0) {
+          addRipple(p.random(p.width), p.random(p.height), p.random(30, 80));
+        }
+      };
+
+      function drawGiantLeaves() {
+        giantLeaves.forEach(leaf => {
+          let swayAngle = p.sin(time * leaf.swaySpeed + leaf.swayPhase) * 0.15;
+          let currentAngle = leaf.angle + swayAngle;
+
+          p.push();
+          p.translate(leaf.x, leaf.y);
+          p.rotate(currentAngle);
+
+          if (leaf.type === 'palm') {
+            drawGiantPalmLeaf(leaf);
+          } else if (leaf.type === 'monstera') {
+            drawGiantMonsteraLeaf(leaf);
+          } else {
+            drawGiantFernLeaf(leaf);
+          }
+
+          p.pop();
+        });
+      }
+
+      function drawGiantPalmLeaf(leaf) {
+        p.fill(leaf.color[0], leaf.color[1], leaf.color[2], 200);
+        p.noStroke();
+
+        let segments = 12;
+        let segmentLength = leaf.size / segments;
+
+        p.stroke(leaf.color[0] - 20, leaf.color[1] - 20, leaf.color[2] - 20, 180);
+        p.strokeWeight(4);
+        p.line(0, 0, leaf.side === 'left' ? leaf.size : -leaf.size, 0);
+
+        for (let i = 0; i < segments; i++) {
+          let x = (leaf.side === 'left' ? 1 : -1) * i * segmentLength;
+          let width = p.map(i, 0, segments, leaf.size * 0.4, leaf.size * 0.1);
+
+          p.fill(leaf.color[0], leaf.color[1], leaf.color[2], 180 - i * 10);
+
+          p.beginShape();
+          p.vertex(x, 0);
+          p.vertex(x + segmentLength * 0.8, -width/2);
+          p.vertex(x + segmentLength, 0);
+          p.vertex(x + segmentLength * 0.8, width/2);
+          p.endShape(p.CLOSE);
+        }
+      }
+
+      function drawGiantMonsteraLeaf(leaf) {
+        p.fill(leaf.color[0], leaf.color[1], leaf.color[2], 220);
+        p.noStroke();
+
+        let w = leaf.size;
+        let h = leaf.size * 1.2;
+
+        p.beginShape();
+        p.vertex(0, -h/2);
+        p.bezierVertex(w/3, -h/2, w/2, -h/6, w/2, 0);
+        p.bezierVertex(w/2, h/6, w/3, h/2, 0, h/2);
+        p.bezierVertex(-w/3, h/2, -w/2, h/6, -w/2, 0);
+        p.bezierVertex(-w/2, -h/6, -w/3, -h/2, 0, -h/2);
+        p.endShape(p.CLOSE);
+
+        p.fill(100, 150, 200, 100);
+        p.circle(-w/6, -h/8, w/8);
+        p.circle(w/5, h/10, w/10);
+        p.circle(0, h/6, w/12);
+
+        p.stroke(leaf.color[0] - 30, leaf.color[1] - 30, leaf.color[2] - 30, 150);
+        p.strokeWeight(3);
+        p.line(0, -h/2, 0, h/2);
+        p.line(0, 0, w/3, -h/4);
+        p.line(0, 0, -w/3, -h/4);
+      }
+
+      function drawGiantFernLeaf(leaf) {
+        p.fill(leaf.color[0], leaf.color[1], leaf.color[2], 200);
+        p.noStroke();
+
+        let segments = 15;
+        let segmentLength = leaf.size / segments;
+
+        p.stroke(leaf.color[0] - 10, leaf.color[1] - 10, leaf.color[2] - 10, 160);
+        p.strokeWeight(3);
+        p.line(0, 0, 0, -leaf.size);
+
+        for (let i = 0; i < segments; i++) {
+          let y = -i * segmentLength;
+          let pinnaWidth = p.map(i, 0, segments, leaf.size * 0.25, leaf.size * 0.05);
+
+          p.fill(leaf.color[0], leaf.color[1], leaf.color[2], 170 - i * 8);
+
+          p.ellipse(-pinnaWidth/2, y, pinnaWidth, segmentLength * 0.8);
+          p.ellipse(pinnaWidth/2, y, pinnaWidth, segmentLength * 0.8);
+        }
+      }
+
+      function updateAndDrawPoolFloats() {
+        poolFloats.forEach(floatItem => {
+          floatItem.x += floatItem.vx + p.sin(time + floatItem.floatPhase) * 0.3;
+          floatItem.y += floatItem.vy + p.cos(time * 0.8 + floatItem.floatPhase) * 0.2;
+          floatItem.rotation += floatItem.rotSpeed;
+
+          if (floatItem.x < 50) floatItem.x = 50;
+          if (floatItem.x > p.width - 50) floatItem.x = p.width - 50;
+          if (floatItem.y < 50) floatItem.y = 50;
+          if (floatItem.y > p.height - 50) floatItem.y = p.height - 50;
+
+          p.push();
+          p.translate(floatItem.x, floatItem.y);
+          p.rotate(floatItem.rotation);
+
+          p.fill(0, 0, 0, 30);
+          p.noStroke();
+          p.ellipse(5, 5, floatItem.size, floatItem.size * 0.6);
+
+          switch(floatItem.type) {
+            case 'ring':
+              drawFloatRing(floatItem);
+              break;
+            case 'mattress':
+              drawFloatMattress(floatItem);
+              break;
+            case 'ball':
+              drawFloatBall(floatItem);
+              break;
+            case 'donut':
+              drawFloatDonut(floatItem);
+              break;
+            case 'unicorn':
+              drawFloatUnicorn(floatItem);
+              break;
+          }
+
+          p.pop();
+        });
+      }
+
+      function drawFloatRing(item) {
+        p.fill(item.color[0], item.color[1], item.color[2], 200);
+        p.noStroke();
+        p.ellipse(0, 0, item.size, item.size * 0.6);
+        p.fill(100, 150, 200, 80);
+        p.ellipse(0, 0, item.size * 0.5, item.size * 0.3);
+        p.fill(255, 255, 255, 100);
+        p.ellipse(-item.size * 0.15, -item.size * 0.1, item.size * 0.2, item.size * 0.1);
+      }
+
+      function drawFloatMattress(item) {
+        p.fill(item.color[0], item.color[1], item.color[2], 180);
+        p.noStroke();
+
+        let w = item.size * 1.2;
+        let h = item.size * 0.5;
+
+        p.rect(-w/2, -h/2, w, h, 10);
+
+        p.fill(item.color[0] + 20, item.color[1] + 20, item.color[2] + 20, 200);
+        p.rect(-w/2 + 10, -h/2 + 5, w * 0.25, h - 10, 5);
+
+        p.stroke(255, 255, 255, 60);
+        p.strokeWeight(1);
+        for (let i = 1; i < 4; i++) {
+          p.line(-w/2 + w * 0.3, -h/2 + i * h/4, w/2 - 10, -h/2 + i * h/4);
+        }
+      }
+
+      function drawFloatBall(item) {
+        let r = item.size * 0.4;
+
+        p.fill(0, 0, 0, 20);
+        p.ellipse(5, 5, r * 2, r * 2);
+
+        let segments = 6;
+        for (let i = 0; i < segments; i++) {
+          let startAngle = i * p.TWO_PI / segments;
+          let endAngle = (i + 1) * p.TWO_PI / segments;
+
+          let c = i % 2 === 0 ? item.color : [255, 255, 255];
+          p.fill(c[0], c[1], c[2], 220);
+
+          p.arc(0, 0, r * 2, r * 2, startAngle, endAngle);
+        }
+
+        p.fill(255, 255, 255, 150);
+        p.ellipse(-r * 0.3, -r * 0.3, r * 0.4, r * 0.3);
+      }
+
+      function drawFloatDonut(item) {
+        p.fill(item.color[0], item.color[1], item.color[2], 200);
+        p.noStroke();
+        p.ellipse(0, 0, item.size, item.size * 0.7);
+        p.fill(100, 150, 200, 80);
+        p.ellipse(0, 0, item.size * 0.35, item.size * 0.25);
+
+        p.fill(255, 255, 255, 200);
+        for (let i = 0; i < 8; i++) {
+          let angle = i * p.TWO_PI / 8;
+          let x = p.cos(angle) * item.size * 0.35;
+          let y = p.sin(angle) * item.size * 0.25;
+          p.circle(x, y, 3);
+        }
+      }
+
+      function drawFloatUnicorn(item) {
+        p.fill(item.color[0], item.color[1], item.color[2], 200);
+        p.noStroke();
+        p.ellipse(0, 0, item.size, item.size * 0.5);
+        p.ellipse(-item.size * 0.35, -item.size * 0.1, item.size * 0.4, item.size * 0.3);
+
+        p.fill(255, 220, 100, 220);
+        p.triangle(
+          -item.size * 0.45, -item.size * 0.2,
+          -item.size * 0.4, -item.size * 0.35,
+          -item.size * 0.35, -item.size * 0.2
+        );
+
+        p.fill(255, 255, 255, 180);
+        p.circle(-item.size * 0.25, -item.size * 0.15, item.size * 0.15);
+        p.circle(-item.size * 0.2, -item.size * 0.25, item.size * 0.12);
+
+        p.circle(item.size * 0.45, 0, item.size * 0.12);
+      }
+
+      function updateLyrics() {
+        let currentTime = p.millis();
+
+        lyrics.forEach((lyric, index) => {
+          let triggerTime = lyric.delay;
+
+          if (currentTime > triggerTime && !lyric.isActive) {
+            lyric.isActive = true;
+            lyric.alpha = 0;
+
+            if (!lyric.hasRippled) {
+              createLyricRipple(lyric);
+              lyric.hasRippled = true;
+            }
+          }
+
+          if (lyric.isActive) {
+            if (lyric.alpha < lyric.targetAlpha) {
+              lyric.alpha += 3;
+            }
+
+            if (currentTime > triggerTime + 5000) {
+              lyric.alpha -= 2;
+              if (lyric.alpha <= 0) {
+                lyric.isActive = false;
+              }
+            }
+          }
+
+          lyric.ripplePhase += 0.02;
+        });
+      }
+
+      function createLyricRipple(lyric) {
+        ripples.push({
+          x: lyric.x,
+          y: lyric.y,
+          radius: 10,
+          maxRadius: 120,
+          speed: 2,
+          alpha: 180,
+          lineWidth: 3,
+          isLyricRipple: true,
+          lyricText: lyric.text,
+          lyricColor: colors.dreamPink
+        });
+
+        let chars = lyric.text.split('');
+        chars.forEach((char, i) => {
+          if (char !== ' ') {
+            lyricParticles.push({
+              char: char,
+              x: lyric.x,
+              y: lyric.y,
+              vx: p.random(-1.5, 1.5),
+              vy: p.random(-1, -2.5),
+              alpha: 255,
+              size: p.random(14, 20),
+              rotation: p.random(-0.3, 0.3),
+              rotSpeed: p.random(-0.05, 0.05),
+              life: 1.0,
+              decay: p.random(0.008, 0.015),
+              floatPhase: p.random(p.TWO_PI),
+              color: p.random() > 0.5 ? colors.dreamPink : colors.dreamCyan
+            });
+          }
+        });
+      }
+
+      function drawLyricsWithRipple() {
+        p.push();
+
+        lyrics.forEach(lyric => {
+          if (lyric.alpha > 0) {
+            let floatY = p.sin(time * lyric.floatSpeed + lyric.floatPhase) * 8;
+            let floatX = p.cos(time * lyric.floatSpeed * 0.7 + lyric.floatPhase) * 5;
+            let rippleDistortion = p.sin(lyric.ripplePhase) * 3;
+
+            let x = lyric.x + floatX + rippleDistortion;
+            let y = lyric.y + floatY;
+
+            p.push();
+            p.translate(x, y);
+
+            let blurAmount = p.map(lyric.alpha, 0, 255, 2, 0);
+            if (blurAmount > 0) {
+              p.drawingContext.filter = `blur(${blurAmount}px)`;
+            }
+
+            p.fill(colors.waterDeep[0], colors.waterDeep[1], colors.waterDeep[2], lyric.alpha * 0.3);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.textFont('Georgia');
+            p.textSize(22);
+            p.textStyle(p.ITALIC);
+            p.text(lyric.text, 3, 3);
+
+            let textColor = p.random() > 0.5 ? colors.dreamPink : colors.dreamCyan;
+            p.fill(textColor[0], textColor[1], textColor[2], lyric.alpha);
+            p.text(lyric.text, 0, 0);
+
+            p.drawingContext.filter = 'none';
+            p.fill(textColor[0], textColor[1], textColor[2], lyric.alpha * 0.3);
+            p.text(lyric.text, 0, 0);
+
+            p.pop();
+          }
+        });
+
+        p.pop();
+      }
+
+      function drawLyricParticles() {
+        p.push();
+
+        for (let i = lyricParticles.length - 1; i >= 0; i--) {
+          let particle = lyricParticles[i];
+
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+          particle.rotation += particle.rotSpeed;
+          particle.life -= particle.decay;
+
+          particle.vx *= 0.99;
+          particle.vy *= 0.99;
+
+          let floatY = p.sin(time * 2 + particle.floatPhase) * 2;
+
+          if (particle.life <= 0) {
+            lyricParticles.splice(i, 1);
+            continue;
+          }
+
+          particle.alpha = particle.life * 255;
+
+          p.push();
+          p.translate(particle.x, particle.y + floatY);
+          p.rotate(particle.rotation);
+
+          let blurAmount = (1 - particle.life) * 4;
+          if (blurAmount > 0) {
+            p.drawingContext.filter = `blur(${blurAmount}px)`;
+          }
+
+          p.fill(colors.waterDeep[0], colors.waterDeep[1], colors.waterDeep[2], particle.alpha * 0.2);
+          p.textAlign(p.CENTER, p.CENTER);
+          p.textFont('Georgia');
+          p.textSize(particle.size);
+          p.textStyle(p.ITALIC);
+          p.text(particle.char, 2, 2);
+
+          p.fill(particle.color[0], particle.color[1], particle.color[2], particle.alpha);
+          p.text(particle.char, 0, 0);
+
+          p.drawingContext.filter = 'none';
+          p.pop();
+        }
+
+        p.pop();
+      }
+
+      function drawPlantShadows() {
+        p.push();
+        p.blendMode(p.MULTIPLY);
+        plantShadows.forEach(shadow => {
+          let swayAngle = p.sin(shadow.swayPhase) * 0.15;
+          let currentAngle = shadow.baseAngle + swayAngle;
+          p.push();
+          p.translate(shadow.x, shadow.y);
+          p.rotate(currentAngle);
+          for (let i = 0; i < shadow.leafCount; i++) {
+            let leafAngle = (i / shadow.leafCount) * p.PI * 2 + p.sin(time * 0.5 + i) * 0.2;
+            let leafLength = shadow.leafSize * (0.8 + p.sin(time * 0.3 + i * 0.5) * 0.2);
+            let leafWidth = shadow.leafSize * 0.3;
+            p.push();
+            p.rotate(leafAngle);
+            let leafOpacity = shadow.opacity + p.sin(time + i) * 10;
+            if (shadow.type === 'palm') {
+              p.fill(colors.palmShadow[0], colors.palmShadow[1], colors.palmShadow[2], leafOpacity);
+              p.noStroke();
+              p.beginShape();
+              p.vertex(0, 0);
+              p.bezierVertex(leafWidth * 0.5, leafLength * 0.3, leafWidth * 0.3, leafLength * 0.8, 0, leafLength);
+              p.bezierVertex(-leafWidth * 0.3, leafLength * 0.8, -leafWidth * 0.5, leafLength * 0.3, 0, 0);
+              p.endShape(p.CLOSE);
+              p.stroke(colors.palmShadow[0] + 20, colors.palmShadow[1] + 20, colors.palmShadow[2] + 20, leafOpacity * 0.5);
+              p.strokeWeight(1);
+              p.line(0, 0, 0, leafLength * 0.9);
+            } else {
+              p.fill(colors.leafShadow[0], colors.leafShadow[1], colors.leafShadow[2], leafOpacity);
+              p.noStroke();
+              p.ellipse(0, leafLength * 0.5, leafWidth * 0.4, leafLength);
+              for (let j = 0; j < 5; j++) {
+                let subY = (j / 5) * leafLength * 0.8 + leafLength * 0.1;
+                let subSize = leafWidth * (0.6 - j * 0.08);
+                p.ellipse(-subSize * 0.8, subY, subSize, subSize * 1.5);
+                p.ellipse(subSize * 0.8, subY, subSize, subSize * 1.5);
+              }
+            }
+            p.pop();
+          }
+          p.fill(40, 60, 50, shadow.opacity * 0.8);
+          p.noStroke();
+          p.circle(0, 0, shadow.leafSize * 0.15);
+          p.pop();
+        });
+        p.pop();
+      }
+
+      function drawSunSpotOnPoolFloor() {
+        if (!sunSpot) return;
+        p.push();
+        p.blendMode(p.ADD);
+        let gradient = p.drawingContext.createRadialGradient(
+          sunSpot.x, sunSpot.y, 0,
+          sunSpot.x, sunSpot.y, sunSpot.radius
+        );
+        gradient.addColorStop(0, `rgba(255, 255, 220, ${sunSpot.alpha/255})`);
+        gradient.addColorStop(0.5, `rgba(255, 250, 200, ${sunSpot.alpha*0.5/255})`);
+        gradient.addColorStop(1, 'transparent');
+        p.drawingContext.fillStyle = gradient;
+        p.noStroke();
+        p.ellipse(sunSpot.x, sunSpot.y, sunSpot.radius * 2);
+        for (let i = 0; i < 3; i++) {
+          let offsetX = p.cos(time * 0.5 + i * 2) * 30;
+          let offsetY = p.sin(time * 0.4 + i * 2) * 20;
+          let r = sunSpot.radius * (0.6 - i * 0.15);
+          let alpha = sunSpot.alpha * (0.5 - i * 0.1);
+          let spotGrad = p.drawingContext.createRadialGradient(
+            sunSpot.x + offsetX, sunSpot.y + offsetY, 0,
+            sunSpot.x + offsetX, sunSpot.y + offsetY, r
+          );
+          spotGrad.addColorStop(0, `rgba(255, 255, 240, ${alpha/255})`);
+          spotGrad.addColorStop(1, 'transparent');
+          p.drawingContext.fillStyle = spotGrad;
+          p.ellipse(sunSpot.x + offsetX, sunSpot.y + offsetY, r * 2);
+        }
+        p.pop();
+      }
+
+      function drawFlamingo() {
+        if (!flamingo) return;
+        p.push();
+        p.translate(flamingo.x, flamingo.y + flamingo.floatOffset);
+        p.rotate(flamingo.rotation);
+        let s = flamingo.size;
+        p.fill(0, 0, 0, 40);
+        p.noStroke();
+        p.ellipse(15, 15, s * 0.9, s * 0.9);
+        let pink = p.color(colors.flamingoPink[0], colors.flamingoPink[1], colors.flamingoPink[2]);
+        let darkPink = p.color(colors.flamingoDark[0], colors.flamingoDark[1], colors.flamingoDark[2]);
+        for (let i = 0; i < 5; i++) {
+          let ratio = i / 5;
+          let c = p.lerpColor(darkPink, pink, ratio);
+          p.fill(c);
+          p.ellipse(0, 0, s * (1 - ratio * 0.1), s * (1 - ratio * 0.1));
+        }
+        p.fill(colors.waterDeep[0], colors.waterDeep[1], colors.waterDeep[2], 200);
+        p.ellipse(0, 0, s * 0.5, s * 0.5);
+        let headX = 0;
+        let headY = -s * 0.45;
+        let headSize = s * 0.35;
+        p.fill(pink);
+        p.ellipse(headX, headY + headSize * 0.3, headSize * 0.8, headSize * 0.6);
+        p.fill(pink);
+        p.ellipse(headX, headY, headSize, headSize * 0.9);
+        p.fill(colors.beakBlack);
+        p.beginShape();
+        p.vertex(headX - headSize * 0.3, headY + headSize * 0.1);
+        p.vertex(headX - headSize * 0.6, headY + headSize * 0.3);
+        p.vertex(headX - headSize * 0.5, headY + headSize * 0.4);
+        p.vertex(headX - headSize * 0.2, headY + headSize * 0.2);
+        p.endShape(p.CLOSE);
+        p.fill(colors.beakWhite);
+        p.beginShape();
+        p.vertex(headX - headSize * 0.3, headY + headSize * 0.1);
+        p.vertex(headX - headSize * 0.25, headY - headSize * 0.1);
+        p.vertex(headX - headSize * 0.15, headY + headSize * 0.05);
+        p.vertex(headX - headSize * 0.2, headY + headSize * 0.2);
+        p.endShape(p.CLOSE);
+        p.fill(0);
+        p.circle(headX - headSize * 0.15, headY - headSize * 0.1, headSize * 0.12);
+        p.fill(255);
+        p.circle(headX - headSize * 0.13, headY - headSize * 0.12, headSize * 0.04);
+        let wingSize = s * 0.25;
+        p.fill(pink);
+        p.ellipse(-s * 0.4, 0, wingSize, wingSize * 1.2);
+        p.fill(darkPink);
+        p.ellipse(-s * 0.4, 0, wingSize * 0.6, wingSize * 0.8);
+        p.fill(pink);
+        p.ellipse(s * 0.4, 0, wingSize, wingSize * 1.2);
+        p.fill(darkPink);
+        p.ellipse(s * 0.4, 0, wingSize * 0.6, wingSize * 0.8);
+        p.fill(pink);
+        p.ellipse(0, s * 0.4, wingSize * 0.8, wingSize);
+        p.fill(255, 255, 255, 60);
+        p.ellipse(-s * 0.15, -s * 0.15, s * 0.2, s * 0.15);
+        p.ellipse(s * 0.1, -s * 0.2, s * 0.15, s * 0.1);
+        p.pop();
+      }
+
+      function drawSkyReflection() {
+        for (let y = 0; y < p.height; y++) {
+          let inter = p.map(y, 0, p.height, 0, 1);
+          let c = p.lerpColor(
+            p.color(240, 248, 255), 
+            p.color(255, 250, 240), 
+            inter
+          );
+          p.stroke(c);
+          p.line(0, y, p.width, y);
+        }
+      }
+
+      function drawUnderwaterTiles() {
+        p.noStroke();
+        tiles.forEach(tile => {
+          let waveY = p.sin(time + tile.x * 0.01 + tile.wavePhase) * 3;
+          let waveX = p.cos(time * 0.7 + tile.y * 0.01) * 2;
+          let d = p.dist(p.mouseX, p.mouseY, tile.x + tile.size/2, tile.y + tile.size/2);
+          let mouseDistort = p.map(d, 0, 150, 15, 0, true);
+          waveX += (p.mouseX - tile.x) * mouseDistort * 0.01;
+          waveY += (p.mouseY - tile.y) * mouseDistort * 0.01;
+          let depthAlpha = p.map(tile.y, 0, p.height, 200, 255);
+          let r = tile.baseColor[0];
+          let g = tile.baseColor[1];
+          let b = tile.baseColor[2];
+          let glow = p.sin(time * 2 + tile.x * 0.02) * 20;
+          p.fill(r + glow, g + glow * 0.5, b, depthAlpha);
+          p.push();
+          p.translate(tile.x + waveX, tile.y + waveY);
+          p.rect(0, 0, tile.size * 0.9, tile.size * 0.9, 4);
+          p.fill(255, 255, 255, 30 + glow * 0.5);
+          p.rect(2, 2, tile.size * 0.3, tile.size * 0.3, 2);
+          p.pop();
+        });
+      }
+
+      function drawRipples() {
+        for (let i = ripples.length - 1; i >= 0; i--) {
+          let r = ripples[i];
+          r.radius += r.speed;
+          r.alpha -= 2;
+          r.lineWidth *= 0.98;
+          if (r.alpha <= 0) {
+            ripples.splice(i, 1);
+            continue;
+          }
+          p.noFill();
+          for (let j = 0; j < 3; j++) {
+            let offset = j * 15;
+            let alpha = r.alpha * (1 - j * 0.3);
+
+            if (r.isLyricRipple) {
+              p.stroke(r.lyricColor[0], r.lyricColor[1], r.lyricColor[2], alpha);
+            } else {
+              p.stroke(colors.neonCyan[0], colors.neonCyan[1], colors.neonCyan[2], alpha);
+            }
+
+            p.strokeWeight(r.lineWidth * (1 - j * 0.2));
+            p.ellipse(r.x, r.y, (r.radius + offset) * 2);
+
+            if (!r.isLyricRipple) {
+              p.stroke(colors.neonPink[0], colors.neonPink[1], colors.neonPink[2], alpha * 0.5);
+              p.ellipse(r.x, r.y, (r.radius + offset) * 2.2);
+            }
+          }
+        }
+      }
+
+      function drawParticles() {
+        p.noStroke();
+        particles.forEach(pt => {
+          pt.x += pt.vx + p.sin(time + pt.y * 0.01) * 0.5;
+          pt.y += pt.vy + p.cos(time * 0.8 + pt.x * 0.01) * 0.3;
+          if (pt.x < 0) pt.x = p.width;
+          if (pt.x > p.width) pt.x = 0;
+          if (pt.y < 0) pt.y = p.height;
+          if (pt.y > p.height) pt.y = 0;
+          let twinkle = p.sin(time * 3 + pt.x) * 20;
+          let alpha = pt.alpha + twinkle;
+          p.fill(pt.color[0], pt.color[1], pt.color[2], alpha);
+          p.circle(pt.x, pt.y, pt.size);
+          p.fill(pt.color[0], pt.color[1], pt.color[2], alpha * 0.3);
+          p.circle(pt.x, pt.y, pt.size * 2);
+        });
+      }
+
+      function drawWaterSurface() {
+        p.noStroke();
+        for (let x = 0; x < p.width; x += 20) {
+          let waveHeight = p.sin(time * 2 + x * 0.02) * 5;
+          let shimmer = p.map(p.sin(time * 3 + x * 0.05), -1, 1, 0, 100);
+          p.fill(255, 255, 255, shimmer);
+          p.ellipse(x, 50 + waveHeight, 30, 8);
+        }
+        let surfaceGradient = p.drawingContext.createLinearGradient(0, 0, 0, 150);
+        surfaceGradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+        surfaceGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.05)');
+        surfaceGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        p.drawingContext.fillStyle = surfaceGradient;
+        p.rect(0, 0, p.width, 150);
+      }
+
+      function addRipple(x, y, size) {
+        ripples.push({
+          x: x,
+          y: y,
+          radius: 10,
+          maxRadius: size || p.random(50, 100),
+          speed: p.random(1, 3),
+          alpha: 150,
+          lineWidth: p.random(2, 4),
+          isLyricRipple: false
+        });
+      }
+
+      p.windowResized = function() {
+        p.resizeCanvas(p.windowWidth, p.windowHeight);
+        initTiles();
+        initFlamingo();
+        initSunSpot();
+        initPlantShadows();
+        initGiantLeaves();
+        initPoolFloats();
+        initLyrics();
+      };
+
+      p.mouseMoved = function() {
+        if (p.frameCount % 5 === 0) {
+          addRipple(p.mouseX, p.mouseY, p.random(20, 40));
+        }
+      };
+
+      p.mousePressed = function() {
+        addRipple(p.mouseX, p.mouseY, p.random(80, 150));
+
+        let words = ["Dreamland", "float", "water", "pool", "drift"];
+        let word = p.random(words);
+        word.split('').forEach((char, i) => {
+          if (char !== ' ') {
+            lyricParticles.push({
+              char: char,
+              x: p.mouseX,
+              y: p.mouseY,
+              vx: p.random(-2, 2),
+              vy: p.random(-2, -4),
+              alpha: 255,
+              size: p.random(16, 24),
+              rotation: p.random(-0.5, 0.5),
+              rotSpeed: p.random(-0.08, 0.08),
+              life: 1.0,
+              decay: p.random(0.01, 0.02),
+              floatPhase: p.random(p.TWO_PI),
+              color: p.random() > 0.5 ? colors.dreamPurple : colors.dreamCyan
+            });
+          }
+        });
+
+        for (let i = 0; i < 10; i++) {
+          particles.push({
+            x: p.mouseX,
+            y: p.mouseY,
+            size: p.random(3, 8),
+            vx: p.random(-2, 2),
+            vy: p.random(-2, 2),
+            alpha: p.random(80, 150),
+            color: p.random() > 0.5 ? colors.neonPink : colors.neonCyan
+          });
+        }
+      };
+
+      p.mouseDragged = function() {
+        addRipple(p.mouseX, p.mouseY, p.random(30, 60));
+      };
+    };
+    // ============================================
+    // 柠檬树草图 - Carrie & Lowell
+    // ============================================
+    window.lemonSketch = function(p) {
+      let leaves = [];
+      let lemons = [];
+      let clouds = [];
+      let sunRays = [];
+      let godRays = [];
+      let heatWaves = [];
+      let lyrics = [];
+      let time = 0;
+
+      const lyricsData = [
+        { 
+          lines: [
+            "I forgive my mother, I forgive my father",
+            "For the things they could not see",
+            "I want to be well, I want to be well",
+            "I want to be well, I want to be well",
+            "Spirits fill my body and I want to be well"
+          ],
+          delay: 0 
+        },
+        { 
+          lines: [
+            "I should have known better",
+            "Than to fall in love with you",
+            "The west was on fire, I could not see",
+            "The smoke was rising over the trees",
+            "I should have known better than to let you go"
+          ],
+          delay: 10000 
+        },
+        { 
+          lines: [
+            "All of me wants all of you",
+            "All of me wants all of you",
+            "The shadow of your brother",
+            "Crossing over to you",
+            "The river is floating, the river is floating"
+          ],
+          delay: 20000 
+        },
+        { 
+          lines: [
+            "I am drawn to the blood",
+            "The blood of my beloved",
+            "The blood of my beloved",
+            "I am drawn to the blood",
+            "I am drawn to the blood"
+          ],
+          delay: 30000 
+        },
+        { 
+          lines: [
+            "I just want to be near you",
+            "I just want to be near you",
+            "The river is floating, the river is floating",
+            "The shadow of your brother crossing over to you",
+            "I just want to be near you"
+          ],
+          delay: 40000 
+        },
+        { 
+          lines: [
+            "Tell me what did you learn from the war of the worlds",
+            "The Fourth of July, the Fourth of July",
+            "Tell me what did you learn from the war of the worlds",
+            "The Fourth of July, the Fourth of July",
+            "The shifting of blood, the shifting of blood"
+          ],
+          delay: 50000 
+        },
+        { 
+          lines: [
+            "The only thing that keeps me from driving this car",
+            "Over the side of the road into the ocean",
+            "The only thing that keeps me from driving this car",
+            "Into the ocean, into the ocean",
+            "Is the love of my beloved"
+          ],
+          delay: 60000 
+        },
+        { 
+          lines: [
+            "When I was three and free",
+            "When I was three and free",
+            "The floor of your house was falling away",
+            "The floor of your house was falling away",
+            "When I was three and free"
+          ],
+          delay: 70000 
+        },
+        { 
+          lines: [
+            "Are we a long way from the start",
+            "Are we a long way from the start",
+            "My beloved, my beloved",
+            "Are we a long way from the start",
+            "My beloved, my beloved"
+          ],
+          delay: 80000 
+        },
+        { 
+          lines: [
+            "No shade in the shadow of the cross",
+            "No shade in the shadow of the cross",
+            "The body is a blade that cuts a path",
+            "The body is a blade that cuts a path",
+            "No shade in the shadow of the cross"
+          ],
+          delay: 90000 
+        },
+        { 
+          lines: [
+            "Blue bucket of gold, faintly I am with you",
+            "Blue bucket of gold, faintly I am with you",
+            "The floor of your house was falling away",
+            "The floor of your house was falling away",
+            "Blue bucket of gold, faintly I am with you"
+          ],
+          delay: 100000 
+        }
+      ];
+
+      p.setup = function() {
+        p.createCanvas(p.windowWidth, p.windowHeight);
+        p.pixelDensity(1);
+
+        initClusteredLeavesAndLemons();
+        initClouds();
+        initSunRays();
+        initGodRays();
+        initHeatWaves();
+        initLyrics();
+      };
+
+      function initClusteredLeavesAndLemons() {
+        leaves = [];
+        lemons = [];
+
+        const clusters = [
+          { x: 0.08, y: 0.12, count: 55, spread: 160, overlap: true },
+          { x: 0.22, y: 0.08, count: 70, spread: 200, overlap: true },
+          { x: 0.12, y: 0.28, count: 60, spread: 180, overlap: false },
+          { x: 0.38, y: 0.1, count: 75, spread: 220, overlap: true },
+          { x: 0.48, y: 0.22, count: 65, spread: 190, overlap: true },
+          { x: 0.32, y: 0.32, count: 50, spread: 150, overlap: false },
+          { x: 0.65, y: 0.08, count: 68, spread: 210, overlap: true },
+          { x: 0.78, y: 0.18, count: 72, spread: 200, overlap: true },
+          { x: 0.88, y: 0.12, count: 58, spread: 170, overlap: false },
+          { x: 0.82, y: 0.32, count: 52, spread: 160, overlap: false },
+          { x: 0.05, y: 0.45, count: 62, spread: 175, overlap: true },
+          { x: 0.18, y: 0.55, count: 48, spread: 140, overlap: false },
+          { x: 0.45, y: 0.45, count: 80, spread: 230, overlap: true },
+          { x: 0.58, y: 0.38, count: 66, spread: 195, overlap: true },
+          { x: 0.75, y: 0.48, count: 64, spread: 185, overlap: true },
+          { x: 0.92, y: 0.42, count: 56, spread: 165, overlap: false },
+          { x: 0.1, y: 0.72, count: 54, spread: 155, overlap: false },
+          { x: 0.25, y: 0.82, count: 60, spread: 170, overlap: true },
+          { x: 0.5, y: 0.75, count: 70, spread: 200, overlap: true },
+          { x: 0.42, y: 0.88, count: 52, spread: 150, overlap: false },
+          { x: 0.72, y: 0.78, count: 58, spread: 165, overlap: true },
+          { x: 0.88, y: 0.85, count: 50, spread: 145, overlap: false }
+        ];
+
+        clusters.forEach((cluster, clusterIndex) => {
+          let centerX = cluster.x * p.width;
+          let centerY = cluster.y * p.height;
+
+          for (let i = 0; i < cluster.count; i++) {
+            let angle = p.random(p.TWO_PI);
+            let radius = p.random(cluster.spread) * Math.sqrt(p.random());
+
+            let leafX = centerX + p.cos(angle) * radius;
+            let leafY = centerY + p.sin(angle) * radius * 0.7;
+
+            leafX = p.constrain(leafX, 15, p.width - 15);
+            leafY = p.constrain(leafY, 15, p.height - 15);
+
+            leaves.push({
+              x: leafX,
+              y: leafY,
+              baseX: leafX,
+              baseY: leafY,
+              size: p.random(30, 65),
+              angle: p.random(p.TWO_PI),
+              baseAngle: p.random(p.TWO_PI),
+              swaySpeed: p.random(0.006, 0.02),
+              swayPhase: p.random(p.TWO_PI),
+              color: p.random() > 0.35 ? 
+                p.color(130, 175, 50, p.random(170, 230)) : 
+                p.color(170, 195, 90, p.random(150, 210)),
+              pushed: false,
+              pushVx: 0,
+              pushVy: 0,
+              returnSpeed: p.random(0.012, 0.025),
+              clusterIndex: clusterIndex,
+              layer: p.random() > 0.5 ? 1 : 0
+            });
+          }
+
+          let lemonCount = p.random() > 0.3 ? 2 : 1;
+          for (let j = 0; j < lemonCount; j++) {
+            let angle = p.random(p.TWO_PI);
+            let radius = p.random(cluster.spread * 0.3, cluster.spread * 0.6);
+
+            let lemonX = centerX + p.cos(angle) * radius;
+            let lemonY = centerY + p.sin(angle) * radius * 0.7;
+
+            lemonX = p.constrain(lemonX, 20, p.width - 20);
+            lemonY = p.constrain(lemonY, 20, p.height - 20);
+
+            lemons.push({
+              x: lemonX,
+              y: lemonY,
+              baseX: lemonX,
+              baseY: lemonY,
+              size: p.random(18, 28),
+              angle: p.random(p.TWO_PI),
+              color: p.color(255, 220, 50, 240),
+              shadowColor: p.color(200, 170, 30, 180),
+              swaySpeed: p.random(0.008, 0.015),
+              swayPhase: p.random(p.TWO_PI),
+              pushed: false,
+              pushVx: 0,
+              pushVy: 0,
+              returnSpeed: 0.02
+            });
+          }
+        });
+      }
+
+      function initClouds() {
+        clouds = [];
+        let cloudCount = p.floor(p.random(5, 8));
+        for (let i = 0; i < cloudCount; i++) {
+          clouds.push({
+            x: p.random(p.width),
+            y: p.random(p.height * 0.05, p.height * 0.25),
+            size: p.random(80, 180),
+            speed: p.random(0.2, 0.6),
+            opacity: p.random(40, 80),
+            puffs: p.floor(p.random(3, 6))
+          });
+        }
+      }
+
+      function initSunRays() {
+        sunRays = [];
+        for (let i = 0; i < 12; i++) {
+          sunRays.push({
+            angle: p.random(p.PI * 0.1, p.PI * 0.9),
+            length: p.random(p.height * 0.5, p.height * 1.2),
+            width: p.random(20, 60),
+            alpha: p.random(10, 25),
+            pulseSpeed: p.random(0.3, 0.8),
+            phase: p.random(p.TWO_PI)
+          });
+        }
+      }
+
+      function initGodRays() {
+        godRays = [];
+        for (let i = 0; i < 25; i++) {
+          godRays.push({
+            x: p.random(p.width),
+            y: p.random(p.height),
+            angle: p.random(p.TWO_PI),
+            length: p.random(100, 300),
+            width: p.random(30, 80),
+            alpha: p.random(15, 35),
+            pulseSpeed: p.random(0.4, 1.0),
+            phase: p.random(p.TWO_PI),
+            color: [255, 250, 220]
+          });
+        }
+      }
+
+      function initHeatWaves() {
+        heatWaves = [];
+        for (let i = 0; i < 8; i++) {
+          heatWaves.push({
+            x: p.random(p.width),
+            y: p.random(p.height * 0.3, p.height),
+            width: p.random(100, 250),
+            height: p.random(20, 50),
+            speed: p.random(0.5, 1.5),
+            offset: p.random(100)
+          });
+        }
+      }
+
+      function initLyrics() {
+        lyrics = lyricsData.map((data, index) => ({
+          ...data,
+          alpha: 0,
+          targetAlpha: 230,
+          x: p.random(p.width * 0.12, p.width * 0.88),
+          y: p.random(p.height * 0.15, p.height * 0.85),
+          floatPhase: p.random(p.TWO_PI),
+          floatSpeed: p.random(0.005, 0.015),
+          ripplePhase: 0,
+          isActive: false,
+          fadeState: "in",
+          fadeInStart: 0,
+          holdStart: 0,
+          fadeOutStart: 0
+        }));
+      }
+
+      p.draw = function() {
+        time += 0.016;
+
+        drawSummerSky();
+        drawSunRays();
+        drawClouds();
+        drawHeatWaves();
+        drawGodRays();
+        updateLyrics();
+        drawLyrics();
+        updateLeaves();
+        drawLeaves();
+        updateLemons();
+        drawLemons();
+        drawSummerHaze();
+      };
+
+      function drawSummerSky() {
+        for (let y = 0; y < p.height; y++) {
+          let inter = p.map(y, 0, p.height, 0, 1);
+
+          let r, g, b;
+          if (inter < 0.4) {
+            let t = inter / 0.4;
+            r = p.lerp(150, 180, t);
+            g = p.lerp(200, 220, t);
+            b = p.lerp(255, 245, t);
+          } else {
+            let t = (inter - 0.4) / 0.6;
+            r = p.lerp(180, 240, t);
+            g = p.lerp(220, 235, t);
+            b = p.lerp(245, 220, t);
+          }
+
+          p.stroke(r, g, b);
+          p.line(0, y, p.width, y);
+        }
+
+        let sunY = p.height * 0.08;
+        let sunX = p.width * 0.5;
+
+        for (let r = 300; r > 0; r -= 10) {
+          let alpha = p.map(r, 0, 300, 40, 0);
+          p.noStroke();
+          p.fill(255, 255, 240, alpha);
+          p.circle(sunX, sunY, r * 2);
+        }
+      }
+
+      function drawSunRays() {
+        p.push();
+        p.blendMode(p.ADD);
+
+        sunRays.forEach(ray => {
+          let pulse = p.sin(time * ray.pulseSpeed + ray.phase) * 0.5 + 0.5;
+          let currentAlpha = ray.alpha * pulse;
+
+          let endX = p.width * 0.5 + p.cos(ray.angle) * ray.length;
+          let endY = p.height * 0.08 + p.sin(ray.angle) * ray.length;
+
+          let gradient = p.drawingContext.createLinearGradient(
+            p.width * 0.5, p.height * 0.08,
+            endX, endY
+          );
+          gradient.addColorStop(0, `rgba(255, 255, 220, ${currentAlpha/255})`);
+          gradient.addColorStop(0.5, `rgba(255, 250, 200, ${(currentAlpha*0.5)/255})`);
+          gradient.addColorStop(1, `rgba(255, 250, 180, 0)`);
+
+          p.drawingContext.strokeStyle = gradient;
+          p.drawingContext.lineWidth = ray.width;
+          p.drawingContext.beginPath();
+          p.drawingContext.moveTo(p.width * 0.5, p.height * 0.08);
+          p.drawingContext.lineTo(endX, endY);
+          p.drawingContext.stroke();
+        });
+
+        p.pop();
+      }
+
+      function drawClouds() {
+        p.noStroke();
+
+        clouds.forEach(cloud => {
+          cloud.x += cloud.speed;
+          if (cloud.x > p.width + cloud.size) {
+            cloud.x = -cloud.size;
+            cloud.y = p.random(p.height * 0.05, p.height * 0.25);
+          }
+
+          let puffSize = cloud.size / cloud.puffs;
+          for (let i = 0; i < cloud.puffs; i++) {
+            let offsetX = p.cos(i * 0.8 + time * 0.2) * puffSize * 0.3;
+            let offsetY = p.sin(i * 0.6 + time * 0.15) * puffSize * 0.2;
+            let x = cloud.x + i * puffSize * 0.7 + offsetX;
+            let y = cloud.y + offsetY;
+
+            p.fill(255, 255, 250, cloud.opacity);
+            p.circle(x, y, puffSize);
+
+            p.fill(255, 255, 255, cloud.opacity * 0.5);
+            p.circle(x - puffSize * 0.2, y - puffSize * 0.1, puffSize * 0.6);
+          }
+        });
+      }
+
+      function drawHeatWaves() {
+        p.push();
+        p.blendMode(p.ADD);
+
+        heatWaves.forEach(wave => {
+          wave.offset += wave.speed;
+
+          let y = wave.y + p.sin(time * 2 + wave.offset * 0.01) * 10;
+
+          for (let i = 0; i < 3; i++) {
+            let waveY = y + i * 15;
+            let alpha = 8 + p.sin(time * 3 + i) * 5;
+
+            p.fill(255, 255, 240, alpha);
+            p.rect(wave.x, waveY, wave.width, wave.height * 0.3);
+          }
+        });
+
+        p.pop();
+      }
+
+      function drawGodRays() {
+        p.push();
+        p.blendMode(p.ADD);
+
+        godRays.forEach((ray, index) => {
+          let leafIndex = index % leaves.length;
+          let leaf = leaves[leafIndex];
+
+          if (leaf && p.random() > 0.7) {
+            ray.x = leaf.x;
+            ray.y = leaf.y;
+            ray.angle = p.PI / 2 + p.random(-0.3, 0.3);
+          }
+
+          let pulse = p.sin(time * ray.pulseSpeed + ray.phase) * 0.5 + 0.5;
+          let currentAlpha = ray.alpha * pulse;
+
+          let endX = ray.x + p.cos(ray.angle) * ray.length;
+          let endY = ray.y + p.sin(ray.angle) * ray.length;
+
+          let gradient = p.drawingContext.createLinearGradient(
+            ray.x, ray.y,
+            endX, endY
+          );
+          gradient.addColorStop(0, `rgba(${ray.color[0]}, ${ray.color[1]}, ${ray.color[2]}, 0)`);
+          gradient.addColorStop(0.2, `rgba(${ray.color[0]}, ${ray.color[1]}, ${ray.color[2]}, ${(currentAlpha*0.8)/255})`);
+          gradient.addColorStop(0.5, `rgba(${ray.color[0]}, ${ray.color[1]}, ${ray.color[2]}, ${currentAlpha/255})`);
+          gradient.addColorStop(0.8, `rgba(${ray.color[0]}, ${ray.color[1]}, ${ray.color[2]}, ${(currentAlpha*0.6)/255})`);
+          gradient.addColorStop(1, `rgba(${ray.color[0]}, ${ray.color[1]}, ${ray.color[2]}, 0)`);
+
+          p.drawingContext.strokeStyle = gradient;
+          p.drawingContext.lineWidth = ray.width;
+          p.drawingContext.beginPath();
+          p.drawingContext.moveTo(ray.x, ray.y);
+          p.drawingContext.lineTo(endX, endY);
+          p.drawingContext.stroke();
+        });
+
+        p.pop();
+      }
+
+      function drawSummerHaze() {
+        p.push();
+        p.blendMode(p.ADD);
+
+        let hazeAlpha = 15 + p.sin(time * 0.5) * 5;
+        p.fill(255, 240, 200, hazeAlpha);
+        p.rect(0, 0, p.width, p.height);
+
+        let topGradient = p.drawingContext.createLinearGradient(
+          0, 0,
+          0, p.height * 0.4
+        );
+        topGradient.addColorStop(0, `rgba(255, 255, 230, ${hazeAlpha * 1.5 / 255})`);
+        topGradient.addColorStop(1, 'rgba(255, 255, 230, 0)');
+        p.drawingContext.fillStyle = topGradient;
+        p.rect(0, 0, p.width, p.height * 0.4);
+
+        p.pop();
+      }
+
+      function updateLyrics() {
+        let currentTime = p.millis();
+
+        lyrics.forEach((lyric, index) => {
+          let triggerTime = lyric.delay;
+
+          if (currentTime > triggerTime && !lyric.isActive) {
+            lyric.isActive = true;
+            lyric.fadeInStart = currentTime;
+            lyric.fadeState = "in";
+            lyric.alpha = 0;
+          }
+
+          if (lyric.isActive) {
+            if (lyric.fadeState === "in") {
+              let fadeInDuration = 2500;
+              let progress = (currentTime - lyric.fadeInStart) / fadeInDuration;
+
+              if (progress >= 1) {
+                lyric.alpha = lyric.targetAlpha;
+                lyric.fadeState = "hold";
+                lyric.holdStart = currentTime;
+              } else {
+                lyric.alpha = lyric.targetAlpha * (1 - p.pow(1 - progress, 3));
+              }
+            }
+            else if (lyric.fadeState === "hold") {
+              let holdDuration = 5000;
+
+              if (currentTime - lyric.holdStart >= holdDuration) {
+                lyric.fadeState = "out";
+                lyric.fadeOutStart = currentTime;
+              }
+            }
+            else if (lyric.fadeState === "out") {
+              let fadeOutDuration = 3500;
+              let progress = (currentTime - lyric.fadeOutStart) / fadeOutDuration;
+
+              if (progress >= 1) {
+                lyric.alpha = 0;
+                lyric.isActive = false;
+              } else {
+                lyric.alpha = lyric.targetAlpha * (1 - progress);
+              }
+            }
+          }
+        });
+      }
+
+      function drawLyrics() {
+        p.push();
+
+        lyrics.forEach(lyric => {
+          if (lyric.alpha > 0) {
+            p.push();
+            p.translate(lyric.x, lyric.y);
+
+            let lineHeight = 26;
+            let totalHeight = lyric.lines.length * lineHeight;
+            let startY = -totalHeight / 2 + lineHeight / 2;
+
+            lyric.lines.forEach((line, lineIndex) => {
+              let y = startY + lineIndex * lineHeight;
+
+              p.fill(60, 80, 100, lyric.alpha * 0.3);
+              p.textAlign(p.CENTER, p.CENTER);
+              p.textFont("Georgia");
+              p.textSize(17);
+              p.textStyle(p.NORMAL);
+              p.text(line, 2, y + 2);
+
+              p.fill(40, 70, 50, lyric.alpha);
+              p.text(line, 0, y);
+            });
+
+            p.pop();
+          }
+        });
+
+        p.pop();
+      }
+
+      function updateLeaves() {
+        let mouseInfluenceRadius = 130;
+
+        leaves.forEach(leaf => {
+          let d = p.dist(p.mouseX, p.mouseY, leaf.x, leaf.y);
+
+          if (d < mouseInfluenceRadius && (p.mouseX !== 0 || p.mouseY !== 0)) {
+            let angle = p.atan2(leaf.y - p.mouseY, leaf.x - p.mouseX);
+            let force = p.map(d, 0, mouseInfluenceRadius, 3, 0, true);
+
+            leaf.pushVx += p.cos(angle) * force * 0.12;
+            leaf.pushVy += p.sin(angle) * force * 0.12;
+            leaf.pushed = true;
+          }
+
+          if (leaf.pushed) {
+            let dx = leaf.baseX - leaf.x;
+            let dy = leaf.baseY - leaf.y;
+
+            leaf.pushVx += dx * leaf.returnSpeed;
+            leaf.pushVy += dy * leaf.returnSpeed;
+
+            leaf.pushVx *= 0.93;
+            leaf.pushVy *= 0.93;
+
+            leaf.x += leaf.pushVx;
+            leaf.y += leaf.pushVy;
+
+            if (p.abs(dx) < 0.5 && p.abs(dy) < 0.5 && 
+                p.abs(leaf.pushVx) < 0.05 && p.abs(leaf.pushVy) < 0.05) {
+              leaf.x = leaf.baseX;
+              leaf.y = leaf.baseY;
+              leaf.pushVx = 0;
+              leaf.pushVy = 0;
+              leaf.pushed = false;
+            }
+          } else {
+            let swayX = p.sin(time * leaf.swaySpeed + leaf.swayPhase) * 2.5;
+            let swayY = p.cos(time * leaf.swaySpeed * 0.7 + leaf.swayPhase) * 2;
+
+            leaf.x = leaf.baseX + swayX;
+            leaf.y = leaf.baseY + swayY;
+          }
+
+          leaf.angle = leaf.baseAngle + p.sin(time * leaf.swaySpeed + leaf.swayPhase) * 0.12;
+        });
+      }
+
+      function drawLeaves() {
+        [0, 1].forEach(layer => {
+          leaves.filter(l => l.layer === layer).forEach(leaf => {
+            p.push();
+            p.translate(leaf.x, leaf.y);
+            p.rotate(leaf.angle);
+
+            p.fill(leaf.color);
+            p.noStroke();
+
+            p.beginShape();
+            p.vertex(0, -leaf.size/2);
+            p.bezierVertex(
+              leaf.size/2.2, -leaf.size/3,
+              leaf.size/2.2, leaf.size/3,
+              0, leaf.size/2
+            );
+            p.bezierVertex(
+              -leaf.size/2.2, leaf.size/3,
+              -leaf.size/2.2, -leaf.size/3,
+              0, -leaf.size/2
+            );
+            p.endShape(p.CLOSE);
+
+            p.stroke(80, 110, 40, 90);
+            p.strokeWeight(1);
+            p.line(0, -leaf.size/2.5, 0, leaf.size/2.5);
+
+            p.strokeWeight(0.5);
+            p.line(0, -leaf.size/6, leaf.size/3.5, -leaf.size/4);
+            p.line(0, -leaf.size/6, -leaf.size/3.5, -leaf.size/4);
+            p.line(0, leaf.size/6, leaf.size/4, leaf.size/4);
+            p.line(0, leaf.size/6, -leaf.size/4, leaf.size/4);
+
+            p.pop();
+          });
+        });
+      }
+
+      function updateLemons() {
+        let mouseInfluenceRadius = 130;
+
+        lemons.forEach(lemon => {
+          let d = p.dist(p.mouseX, p.mouseY, lemon.x, lemon.y);
+
+          if (d < mouseInfluenceRadius && (p.mouseX !== 0 || p.mouseY !== 0)) {
+            let angle = p.atan2(lemon.y - p.mouseY, lemon.x - p.mouseX);
+            let force = p.map(d, 0, mouseInfluenceRadius, 3.5, 0, true);
+
+            lemon.pushVx += p.cos(angle) * force * 0.15;
+            lemon.pushVy += p.sin(angle) * force * 0.15;
+            lemon.pushed = true;
+          }
+
+          if (lemon.pushed) {
+            let dx = lemon.baseX - lemon.x;
+            let dy = lemon.baseY - lemon.y;
+
+            lemon.pushVx += dx * lemon.returnSpeed;
+            lemon.pushVy += dy * lemon.returnSpeed;
+
+            lemon.pushVx *= 0.92;
+            lemon.pushVy *= 0.92;
+
+            lemon.x += lemon.pushVx;
+            lemon.y += lemon.pushVy;
+
+            if (p.abs(dx) < 0.5 && p.abs(dy) < 0.5 && 
+                p.abs(lemon.pushVx) < 0.05 && p.abs(lemon.pushVy) < 0.05) {
+              lemon.x = lemon.baseX;
+              lemon.y = lemon.baseY;
+              lemon.pushVx = 0;
+              lemon.pushVy = 0;
+              lemon.pushed = false;
+            }
+          } else {
+            let swayX = p.sin(time * lemon.swaySpeed + lemon.swayPhase) * 1.5;
+            let swayY = p.cos(time * lemon.swaySpeed * 0.7 + lemon.swayPhase) * 1;
+
+            lemon.x = lemon.baseX + swayX;
+            lemon.y = lemon.baseY + swayY;
+          }
+
+          lemon.angle = p.sin(time * lemon.swaySpeed + lemon.swayPhase) * 0.1;
+        });
+      }
+
+      function drawLemons() {
+        lemons.forEach(lemon => {
+          p.push();
+          p.translate(lemon.x, lemon.y);
+          p.rotate(lemon.angle);
+
+          p.fill(lemon.shadowColor);
+          p.noStroke();
+          p.ellipse(3, 3, lemon.size * 1.1, lemon.size * 0.85);
+
+          p.fill(lemon.color);
+          p.ellipse(0, 0, lemon.size, lemon.size * 0.8);
+
+          p.fill(255, 255, 220, 150);
+          p.ellipse(-lemon.size * 0.2, -lemon.size * 0.15, lemon.size * 0.3, lemon.size * 0.2);
+
+          p.fill(230, 200, 40, 100);
+          p.circle(-lemon.size * 0.1, lemon.size * 0.1, 2);
+          p.circle(lemon.size * 0.15, -lemon.size * 0.05, 1.5);
+          p.circle(0, lemon.size * 0.2, 1);
+
+          p.pop();
+        });
+      }
+
+      p.windowResized = function() {
+        p.resizeCanvas(p.windowWidth, p.windowHeight);
+        initClusteredLeavesAndLemons();
+        initClouds();
+        initSunRays();
+        initGodRays();
+        initHeatWaves();
+        initLyrics();
+      };
+
+      p.mouseDragged = function() {
+        leaves.forEach(leaf => {
+          let d = p.dist(p.mouseX, p.mouseY, leaf.x, leaf.y);
+          if (d < 130) {
+            let angle = p.atan2(leaf.y - p.mouseY, leaf.x - p.mouseX);
+            let force = p.map(d, 0, 130, 5, 0, true);
+            leaf.pushVx += p.cos(angle) * force;
+            leaf.pushVy += p.sin(angle) * force;
+            leaf.pushed = true;
+          }
+        });
+
+        lemons.forEach(lemon => {
+          let d = p.dist(p.mouseX, p.mouseY, lemon.x, lemon.y);
+          if (d < 130) {
+            let angle = p.atan2(lemon.y - p.mouseY, lemon.x - p.mouseX);
+            let force = p.map(d, 0, 130, 4, 0, true);
+            lemon.pushVx += p.cos(angle) * force;
+            lemon.pushVy += p.sin(angle) * force;
+            lemon.pushed = true;
+          }
+        });
+      };
+    };
+
+    // ============================================
+    // 藏书票功能 (Collector's Stamp)
+    // ============================================
+
+    function showCollectorStamp() {
+      const overlay = document.getElementById('collector-stamp-overlay');
+      if (!overlay) return;
+
+      updateStampData();
+
+      overlay.style.display = 'flex';
+      void overlay.offsetHeight;
+      overlay.classList.add('visible');
+
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCollectorStamp() {
+      const overlay = document.getElementById('collector-stamp-overlay');
+      if (!overlay) return;
+
+      overlay.classList.remove('visible');
+
+      if (window.stampDurationInterval) {
+        clearInterval(window.stampDurationInterval);
+        window.stampDurationInterval = null;
+      }
+
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+      }, 600);
+    }
+
+    function updateStampData() {
+      const sessionIdEl = document.getElementById('stamp-session-id');
+      if (sessionIdEl && State.sessionId) {
+        sessionIdEl.textContent = State.sessionId;
+      }
+
+      const durationEl = document.getElementById('stamp-duration');
+      if (durationEl) {
+        const updateDuration = () => {
+          const elapsed = Date.now() - State.startTime;
+          const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
+          const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
+          const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+          durationEl.textContent = `${h}:${m}:${s}`;
+        };
+        updateDuration();
+        if (window.stampDurationInterval) clearInterval(window.stampDurationInterval);
+        window.stampDurationInterval = setInterval(updateDuration, 1000);
+      }
+
+      const channelsVisitedEl = document.getElementById('stamp-channels-visited');
+      if (channelsVisitedEl) {
+        const uniqueVisited = [...new Set(State.visited)];
+        channelsVisitedEl.textContent = `${uniqueVisited.length} / 4`;
+      }
+
+      const statTracesEl = document.getElementById('stat-traces');
+      const statChannelsEl = document.getElementById('stat-channels');
+      const statWordsEl = document.getElementById('stat-words');
+
+      let totalTraces = 0;
+      let totalWords = 0;
+      const tracesList = [];
+
+      Object.keys(State.channelTraces).forEach(channelId => {
+        const channelTraces = State.channelTraces[channelId];
+        const channelName = CONFIG.channels[channelId]?.title || channelId;
+
+        channelTraces.forEach((traceText, index) => {
+          totalTraces++;
+          totalWords += traceText.length;
+
+          tracesList.push({
+            channel: channelName,
+            text: traceText,
+            time: Date.now() - (channelTraces.length - index) * 60000
+          });
+        });
+      });
+
+      if (statTracesEl) statTracesEl.textContent = totalTraces;
+      if (statChannelsEl) statChannelsEl.textContent = [...new Set(State.visited)].length;
+      if (statWordsEl) statWordsEl.textContent = totalWords;
+
+      const sealSection = document.getElementById('stamp-seal-section');
+      const sealText = document.getElementById('stamp-seal-text');
+      if (sealSection && sealText && State.sealResponse) {
+        sealSection.style.display = 'block';
+        sealText.textContent = State.sealResponse;
+      }
+
+      const tracesListEl = document.getElementById('stamp-traces-list');
+      if (tracesListEl) {
+        if (tracesList.length === 0) {
+          tracesListEl.innerHTML = `
+            <div class="stamp-empty-traces">
+              <div style="font-size: 48px; margin-bottom: 20px; opacity: 0.3;">✦</div>
+              你还未在任何通道留下痕迹<br>
+              <span style="font-size: 12px; opacity: 0.7;">夏日的风仍在等待你的印记...</span>
+            </div>
+          `;
+        } else {
+          tracesListEl.innerHTML = tracesList.map(trace => {
+            const timeStr = formatTraceTime(trace.time);
+            return `
+              <div class="stamp-trace-item">
+                <span class="stamp-trace-channel">${trace.channel}</span>
+                <span class="stamp-trace-text">${escapeHtml(trace.text)}</span>
+                <span class="stamp-trace-time">${timeStr}</span>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      const dateEl = document.getElementById('stamp-date');
+      if (dateEl) {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        dateEl.textContent = dateStr;
+      }
+    }
+
+    function formatTraceTime(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+
+      if (diff < 60000) return '刚刚';
+      if (diff < 3600000) return `${Math.floor(diff/60000)}分钟前`;
+      if (diff < 86400000) return `${Math.floor(diff/3600000)}小时前`;
+      return new Date(timestamp).toLocaleDateString('zh-CN', {month: 'short', day: 'numeric'});
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    document.addEventListener('click', function(e) {
+      const overlay = document.getElementById('collector-stamp-overlay');
+      if (e.target === overlay) {
+        closeCollectorStamp();
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeCollectorStamp();
+      }
+    });
+
+    window.addEventListener('beforeunload', function(e) {
+      if (State.sealBroken && Object.keys(State.channelTraces).length > 0) {
+        e.preventDefault();
+        e.returnValue = '你的夏日痕迹还在这里，确定要离开吗？';
+        return e.returnValue;
+      }
+    });
+
+    // ============================================
+    // 音乐播放器功能
+    // ============================================
+
+    const MusicPlayer = {
+      audio: null,
+      currentTrack: null,
+      isPlaying: false,
+
+      tracks: {
+        contrail: {
+          title: "Chemtrails Over The Country Club",
+          artist: "Lana Del Rey",
+          src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+        },
+        lemontree: {
+          title: "Fourth of July",
+          artist: "Sufjan Stevens",
+          src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+        },
+        highway: {
+          title: "Pink + White",
+          artist: "Frank Ocean",
+          src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+        },
+        pool: {
+          title: "Dreamland",
+          artist: "Glass Animals",
+          src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+        }
+      },
+
+      init() {
+        this.audio = document.getElementById('audio-player');
+        if (!this.audio) return;
+
+        this.audio.volume = 0.3;
+
+        this.audio.addEventListener('timeupdate', () => this.updateProgress());
+        this.audio.addEventListener('ended', () => this.onTrackEnd());
+        this.audio.addEventListener('error', (e) => this.onError(e));
+
+        console.log('[Music Player] 初始化完成');
+      },
+
+      play(channelId) {
+        const track = this.tracks[channelId];
+        if (!track) return;
+
+        if (this.currentTrack === channelId && this.isPlaying) {
+          return;
+        }
+
+        if (this.currentTrack !== channelId) {
+          this.audio.pause();
+          this.audio.currentTime = 0;
+          this.currentTrack = channelId;
+          this.audio.src = track.src;
+        }
+
+        const playPromise = this.audio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            this.isPlaying = true;
+            this.updateUI(track);
+            this.showPlayer();
+            console.log(`[Music Player] 开始播放: ${track.title} - ${track.artist}`);
+          }).catch(error => {
+            console.log('[Music Player] 播放失败:', error);
+            this.updateUI(track);
+            this.showPlayer();
+          });
+        }
+      },
+
+      pause() {
+        if (!this.audio) return;
+        this.audio.pause();
+        this.isPlaying = false;
+        this.updateUI();
+        console.log('[Music Player] 已暂停');
+      },
+
+      stop() {
+        if (!this.audio) return;
+        this.audio.pause();
+        this.audio.currentTime = 0;
+        this.isPlaying = false;
+        this.currentTrack = null;
+        this.hidePlayer();
+        console.log('[Music Player] 已停止');
+      },
+
+      toggle() {
+        if (!this.currentTrack) return;
+
+        if (this.isPlaying) {
+          this.pause();
+        } else {
+          this.play(this.currentTrack);
+        }
+      },
+
+      updateUI(track) {
+        const titleEl = document.getElementById('music-title');
+        const artistEl = document.getElementById('music-artist');
+        const iconEl = document.getElementById('music-icon');
+        const btnEl = document.getElementById('music-toggle');
+
+        if (track) {
+          titleEl.textContent = track.title;
+          artistEl.textContent = track.artist;
+        }
+
+        if (this.isPlaying) {
+          iconEl.textContent = '❚❚';
+          btnEl.classList.add('playing');
+        } else {
+          iconEl.textContent = '▶';
+          btnEl.classList.remove('playing');
+        }
+      },
+
+      updateProgress() {
+        if (!this.audio || !this.audio.duration) return;
+
+        const progress = (this.audio.currentTime / this.audio.duration) * 100;
+        const progressBar = document.getElementById('music-progress-bar');
+        if (progressBar) {
+          progressBar.style.width = progress + '%';
+        }
+      },
+
+      seek(percent) {
+        if (!this.audio || !this.audio.duration) return;
+        this.audio.currentTime = (percent / 100) * this.audio.duration;
+      },
+
+      setVolume(value) {
+        if (!this.audio) return;
+        this.audio.volume = value / 100;
+      },
+
+      onTrackEnd() {
+        if (this.audio) {
+          this.audio.currentTime = 0;
+          this.audio.play();
+        }
+      },
+
+      onError(error) {
+        console.log('[Music Player] 音频错误:', error);
+        this.isPlaying = false;
+        this.updateUI();
+      },
+
+      showPlayer() {
+        const player = document.getElementById('music-player');
+        if (player) {
+          player.classList.add('visible');
+        }
+      },
+
+      hidePlayer() {
+        const player = document.getElementById('music-player');
+        if (player) {
+          player.classList.remove('visible');
+        }
+      }
+    };
+
+    function toggleMusic() {
+      MusicPlayer.toggle();
+    }
+
+    function seekMusic(event) {
+      const progress = document.getElementById('music-progress');
+      if (!progress) return;
+
+      const rect = progress.getBoundingClientRect();
+      const percent = ((event.clientX - rect.left) / rect.width) * 100;
+      MusicPlayer.seek(percent);
+    }
+
+    function changeVolume(value) {
+      MusicPlayer.setVolume(value);
+    }
+
+    const originalOpenChannel = openChannel;
+    openChannel = function(channelId) {
+      originalOpenChannel(channelId);
+
+      setTimeout(() => {
+        MusicPlayer.play(channelId);
+      }, 500);
+    };
+
+    const originalClosePage = closePage;
+    closePage = function() {
+      MusicPlayer.stop();
+
+      originalClosePage();
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      MusicPlayer.init();
+    });
+  </script>
+
+</body>
+</html>
